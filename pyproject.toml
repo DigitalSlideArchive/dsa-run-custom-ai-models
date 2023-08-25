@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "dsa-run-custom-ai-models"
+version = "0.1.0"
+description = ""
+authors = ["Subin Erattakulangara <s.erattakulangara@kitware.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
