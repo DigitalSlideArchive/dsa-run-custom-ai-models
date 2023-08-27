@@ -12,6 +12,7 @@ RUN apt-get update && \
 
 COPY . /opt/scw
 WORKDIR /opt/scw
+RUN python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels
 RUN python -m pip install -e . --find-links https://girder.github.io/large_image_wheels
 
 # Use a newer histomicstk
@@ -21,7 +22,7 @@ RUN python -m pip install -e . --find-links https://girder.github.io/large_image
 #     cd HistomicsTK && \
 #     pip install .
 
-WORKDIR /opt/scw/dsa-run-custom-ai-models
+WORKDIR /opt/scw/dsa_run_custom_ai_models
 
 RUN python -m slicer_cli_web.cli_list_entrypoint --list_cli
 RUN python -m slicer_cli_web.cli_list_entrypoint runCustomAIModels --help

@@ -16,7 +16,6 @@ import h5py
 import numpy as np
 import tensorflow as tf
 from histomicstk.cli.utils import CLIArgumentParser
-from progress_helper import ProgressHelper
 
 
 def getItemsAndAnnotations(gc, folderId, annotationName, missing=False):
