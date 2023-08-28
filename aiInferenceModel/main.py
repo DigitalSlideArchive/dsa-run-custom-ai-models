@@ -7,7 +7,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"This code allows the AI model to be packed as an API"}
+    return {"message": "This code allows the AI model to be packed as an API"}
 
 class NumpyArray(BaseModel):
     """
@@ -16,7 +16,7 @@ class NumpyArray(BaseModel):
     Attributes:
         numpy_array (List[List[float]]): A 2D list representing the NumPy array.
     """
-    numpy_array: List[List[float]]
+    numpy_array: List[List[List[int]]]
 
 @app.post("/process_tiles/")
 async def process_data(input_data: NumpyArray):
@@ -35,7 +35,7 @@ async def process_data(input_data: NumpyArray):
     try:
         # Access the JSON data as a list and convert it to a NumPy array
         json_data = input_data.numpy_array
-        numpy_array = np.array(json_data, dtype=np.float64)
+        numpy_array = np.array(json_data)
         
         # Example: Multiply each element of the NumPy array by 2
         processed_numpy_array = numpy_array * 2
@@ -49,3 +49,8 @@ async def process_data(input_data: NumpyArray):
     
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid data")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
