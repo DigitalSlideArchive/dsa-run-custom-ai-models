@@ -44,7 +44,7 @@
     <string>
       <name>ai_model</name>
       <label>AI Model</label>
-      <description>Address of a AI scheduler in the format '127.0.0.1:8786'.</description>
+      <description>Docker IP address of hosted AI model. Example: '127.0.0.1:8786'</description>
       <longflag>ai_model</longflag>
       <default></default>
     </string>

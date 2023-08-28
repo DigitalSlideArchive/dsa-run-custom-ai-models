@@ -164,10 +164,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             try:
                 payload = {"numpy_array": tile['tile'][:,:,:3].tolist()}
                 response = requests.post(args.ai_model, json=payload)
-                if response.status_code == 200:
-                    print("Request was successful:")
-                    print(response.json())
-                else:
+                if response.status_code != 200:
                     print(f"Request failed with status code: {response.status_code}")
                     print(response.text)
             except requests.exceptions.RequestException as e:
