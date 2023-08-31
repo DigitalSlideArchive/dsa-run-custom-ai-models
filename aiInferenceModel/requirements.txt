@@ -2,3 +2,8 @@ fastapi
 uvicorn[standard]
 pydantic
 numpy
+numpy
+torch
+monai
+pillow
+scipy
