@@ -7,8 +7,13 @@ from scipy.io import loadmat
 import json
 import torch.nn.functional as F
 
-def run_ai_model_inferencing(image_file, json_file,label_mat):
-
+def run_ai_model_inferencing(json_data):
+    image_data = json_data.get("image")
+    mask_data = json_data.get("mask")
+    annot_data = json_data.get("nuclei")
+    size_data = json_data.get("tilesize")
+    image = np.array(image_data)
+    mask = np.array(mask_data)
     model_weights_path = "model.pt"
 
     class_names = {
@@ -25,22 +30,29 @@ def run_ai_model_inferencing(image_file, json_file,label_mat):
     model_state_dict = checkpoint.get("model", checkpoint)
     network.load_state_dict(model_state_dict, strict=True)
 
-    image = Image.open(image_file).convert("RGB")
-    m = loadmat(label_mat)
-    instances = m["inst_map"]
+    #image = Image.open(image_file).convert("RGB")
+    #m = loadmat(label_mat)
+    #instances = m["inst_map"]
+    
     # mask =
-    img = np.asarray(image)
-    with open(json_file, 'r') as json_file:
-        data = json.load(json_file)
+    img = image#np.asarray(image)
+    instances = mask
+    print('image and mask shape',img.shape, mask.shape)
+    nucleiClass = []
+    gx, gy, gh, gw = size_data[0], size_data[1], size_data[2], size_data[3]
+    print('gx gy',gx, gy, gh, gw)
 
     patch_size = 128
-
-    for element in data['annotation']['elements']:
-        x, y = element['center'][0], element['center'][1]
+    for element in annot_data[0]:
+        xr, yr = element['center'][0], element['center'][1]
+        print('xr yr',xr, yr)
+        x = xr - (gx + gw / 2)
+        y = yr - (gy - gh / 2)
         x_start = int(max(x - patch_size / 2, 0))
         y_start = int(max(y - patch_size / 2, 0))
-        x_end = min(x_start + patch_size, img.shape[0])  # Ensure within image boundaries
-        y_end = min(y_start + patch_size, img.shape[1])  # Ensure within image boundaries
+        x_end = int(x_start + patch_size) # Ensure within image boundaries
+        y_end = int(y_start + patch_size)  # Ensure within image boundaries
+        print('start and end',x_start,x_end,y_start, y_end)
 
         # Crop the image and label
         cropped_image_np = img[x_start: x_end, y_start: y_end, :]
@@ -69,8 +81,11 @@ def run_ai_model_inferencing(image_file, json_file,label_mat):
                 pred = network(cropped_img)[0]
                 out = F.softmax(pred, dim=0)
                 out = torch.argmax(out, dim=0)
-                element['class'] = out.item()
-    return data
+                nucleiClass.append(out.item())
+        else:
+            nucleiClass.append(4)
+    print(nucleiClass)           
+    return nucleiClass
 
 if __name__ == "__main__":
     import argparse

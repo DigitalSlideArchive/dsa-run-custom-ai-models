@@ -32,7 +32,7 @@
       <longflag>nuclei_annotation_format</longflag>
       <element>bbox</element>
       <element>boundary</element>
-      <default>boundary</default>
+      <default>bbox</default>
     </string-enumeration>
     <file fileExtensions=".anot" reference="inputImageFile">
       <name>outputNucleiAnnotationFile</name>
@@ -186,7 +186,7 @@
       <label>Remove overlapping nuclei</label>
       <description>Remove overlapping nuclei segmentation from the given region. It is recommended to use this approach when defining the tile overlap parameter.</description>
       <longflag>remove_overlapping_nuclei_segmentation</longflag>
-      <default>True</default>
+      <default>False</default>
     </boolean>
   </parameters>
   <parameters advanced="true">

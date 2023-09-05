@@ -16,6 +16,7 @@ import histomicstk.segmentation.nuclear as htk_nuclear
 import histomicstk.utils as htk_utils
 from histomicstk.cli import utils as cli_utils
 from histomicstk.cli.utils import CLIArgumentParser
+import histomicstk.preprocessing.color_deconvolution as htk_cdeconv
 
 logging.basicConfig(level=logging.CRITICAL)
 
@@ -139,6 +140,51 @@ def compute_reinhard_norm(args, invert_image=False, default_img_inversion=False)
         cli_utils.disp_time_hms(rstats_time)))
     return src_mu_lab, src_sigma_lab
 
+def generate_mask(im_tile, args,src_mu_lab, src_sigma_lab):
+        # Flags
+    single_channel = False
+    invert_image = False
+
+    # get tile image & check number of channels
+    single_channel = len(im_tile['tile'].shape) <= 2 or im_tile['tile'].shape[2] == 1
+    if single_channel:
+        im_tile = np.dstack((im_tile['tile'], im_tile['tile'], im_tile['tile']))
+        if args.ImageInversionForm == "Yes":
+            invert_image = True
+    else:
+        im_tile = im_tile['tile'][:, :, :3]
+
+    # perform image inversion
+    if invert_image:
+        im_tile = np.max(im_tile) - im_tile
+
+    im_nmzd = htk_cnorm.reinhard(im_tile,
+                                 args.reference_mu_lab,
+                                 args.reference_std_lab,
+                                 src_mu=src_mu_lab,
+                                 src_sigma=src_sigma_lab)
+
+    # perform color decovolution
+    w = cli_utils.get_stain_matrix(args)
+
+    # perform deconvolution
+    im_stains = htk_cdeconv.color_deconvolution(im_nmzd, w).Stains
+    im_nuclei_stain = im_stains[:, :, 0].astype(float)
+
+    # segment nuclear foreground
+    im_nuclei_fgnd_mask = im_nuclei_stain < args.foreground_threshold
+
+    # segment nuclei
+    im_nuclei_seg_mask = htk_nuclear.detect_nuclei_kofahi(
+        im_nuclei_stain,
+        im_nuclei_fgnd_mask,
+        args.min_radius,
+        args.max_radius,
+        args.min_nucleus_area,
+        args.local_max_search_radius
+    )
+    return im_nuclei_seg_mask
+
 
 def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
@@ -149,6 +195,8 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
     start_time = time.time()
 
     tile_nuclei_list = []
+
+    tile_nuclei_class = []
 
     for tile in ts.tileIterator(**it_kwargs):
 
@@ -164,15 +212,21 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             src_mu_lab, src_sigma_lab, invert_image=invert_image,
             default_img_inversion=default_img_inversion,
         )
+        tile_nuclei_list.append(cur_nuclei_list)
+
+        nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
+        print('>>mask data', nuclei_mask.shape, tile['tile'].shape)
+
         if args.ai_model:
+            gx, gy, gh, gw  = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth']
             try:
-                payload = {"image": np.asarray(tile['tile'][:,:,:3]).tolist(), "mask": np.asarray(tile['tile'][:,:,:3]).tolist(), "nuclei":cur_nuclei_list}
+                payload = {"image": np.asarray(tile['tile'][:,:,:3]).tolist(), "mask": np.asarray(nuclei_mask).tolist(), "nuclei":cur_nuclei_list, "tilesize":(gx,gy, gh,gw)}
                 response = requests.post(args.ai_model, json=payload)
                 if response.status_code == 200:
-                    tile_nuclei_list.append(response.json().get("nuclei"))
+                    tile_nuclei_class.append(response.json().get("nuclei"))
                 else:
                     print(f"Request failed with status code: {response.status_code}")
-                    tile_nuclei_list.append([])
+                    tile_nuclei_class.append([])
             except requests.exceptions.RequestException as e:
                 print(f"Request error: {e}")
             except Exception as e:
@@ -180,6 +234,23 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
     nuclei_list = [anot
                    for anot_list, _ in tile_nuclei_list for anot in anot_list]
+    
+    class_list = [clss for clss_list in tile_nuclei_class for clss in clss_list]
+
+    #assign color to the outline
+    curated_nuclei_list = []
+    colormap = {0:'rgb(0,0,255)',
+                1:'rgb(0,255,0)',
+                2:'rgb(255,0,0)',
+                3:'rgb(255,255,0)',
+                4:'rgb(255,0,255)'}
+    for i in range(len(nuclei_list)):
+        colorClass = class_list[i]
+        nuclei_list[i]['lineColor'] = colormap[colorClass]
+        curated_nuclei_list.append(nuclei_list[i])
+    
+    print('len of tile nuclei and classes ', len(class_list))
+    print(class_list)
 
     nuclei_detection_time = time.time() - start_time
 
@@ -187,7 +258,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
     print('Nuclei detection time = {}'.format(
         cli_utils.disp_time_hms(nuclei_detection_time)))
-    return nuclei_list
+    return curated_nuclei_list
 
 
 def main(args):

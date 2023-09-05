@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import numpy as np
 from typing import List
 import asyncio
+import nuclickAIModel as aimodel
 
 app = FastAPI()
 
@@ -14,12 +15,8 @@ def read_root():
 async def process_ima(request: Request):
     try:
         json_data = await request.json()
-        image_data = json_data.get("image")
-        mask_data = json_data.get("mask")
-        annot_data = json_data.get("nuclei")
-
-        annot_list = annot_data if isinstance(annot_data, list) else []
-        return {"nuclei":annot_list}
+        network_output = aimodel.run_ai_model_inferencing(json_data)
+        return {"nuclei":network_output}
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid data")
 
