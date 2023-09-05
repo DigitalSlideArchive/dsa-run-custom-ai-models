@@ -33,9 +33,6 @@ def run_ai_model_inferencing(image_file, json_file,label_mat):
     with open(json_file, 'r') as json_file:
         data = json.load(json_file)
 
-    for element in data:
-        print(element)
-
     patch_size = 128
 
     for element in data['annotation']['elements']:

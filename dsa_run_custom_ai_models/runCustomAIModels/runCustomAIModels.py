@@ -144,8 +144,6 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
                             src_sigma_lab=None, default_img_inversion=False):
 
-    import dask
-
     print('\n>> Detecting nuclei ...\n')
 
     start_time = time.time()
@@ -158,34 +156,27 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
         if is_wsi and tile_fgnd_frac_list[tile_position] <= args.min_fgnd_frac:
             continue
-            
-        if args.ai_model:
-            print('>>Using AI docker image', args.ai_model)
-            try:
-                payload = {"numpy_array": tile['tile'][:,:,:3].tolist()}
-                response = requests.post(args.ai_model, json=payload)
-                if response.status_code != 200:
-                    print(f"Request failed with status code: {response.status_code}")
-                    print(response.text)
-            except requests.exceptions.RequestException as e:
-                # Handle any exceptions related to the request
-                print(f"Request error: {e}")
-            except Exception as e:
-                # Handle any other unexpected exceptions
-                print(f"Error: {e}")
 
         # detect nuclei
-        cur_nuclei_list = dask.delayed(htk_nuclear.detect_tile_nuclei)(
+        cur_nuclei_list = htk_nuclear.detect_tile_nuclei(
             tile,
             args,
             src_mu_lab, src_sigma_lab, invert_image=invert_image,
             default_img_inversion=default_img_inversion,
         )
-
-        # append result to list
-        tile_nuclei_list.append(cur_nuclei_list)
-
-    tile_nuclei_list = dask.delayed(tile_nuclei_list).compute()
+        if args.ai_model:
+            try:
+                payload = {"image": np.asarray(tile['tile'][:,:,:3]).tolist(), "mask": np.asarray(tile['tile'][:,:,:3]).tolist(), "nuclei":cur_nuclei_list}
+                response = requests.post(args.ai_model, json=payload)
+                if response.status_code == 200:
+                    tile_nuclei_list.append(response.json().get("nuclei"))
+                else:
+                    print(f"Request failed with status code: {response.status_code}")
+                    tile_nuclei_list.append([])
+            except requests.exceptions.RequestException as e:
+                print(f"Request error: {e}")
+            except Exception as e:
+                print(f"Error: {e}")
 
     nuclei_list = [anot
                    for anot_list, _ in tile_nuclei_list for anot in anot_list]

@@ -1,8 +1,8 @@
-# FROM python:3.9-slim
-FROM tensorflow/tensorflow:latest-gpu
+FROM python:3.9-slim
+#FROM tensorflow/tensorflow:latest-gpu
 
 # This tells girder_worker to enable gpu if possible
-LABEL com.nvidia.volumes.needed=nvidia_driver
+#LABEL com.nvidia.volumes.needed=nvidia_driver
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
