@@ -14,6 +14,7 @@ def run_ai_model_inferencing(json_data):
     size_data = json_data.get("tilesize")
     image = np.array(image_data)
     mask = np.array(mask_data)
+    mask = (mask > 0).astype(np.uint8)
     model_weights_path = "model.pt"
 
     class_names = {
