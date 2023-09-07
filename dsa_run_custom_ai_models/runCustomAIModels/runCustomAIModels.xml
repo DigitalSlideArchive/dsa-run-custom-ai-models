@@ -1,13 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <executable>
   <category>HistomicsTK</category>
-  <title>Detects Nuclei</title>
-  <description>Detects nuclei in a whole-slide image</description>
+  <title>AI model adapter</title>
+  <description>Adapter for connecting AI models with DSA</description>
   <version>0.1.0</version>
   <documentation-url>https://digitalslidearchive.github.io/HistomicsTK/</documentation-url>
   <license>Apache 2.0</license>
-  <contributor>Deepak Roy Chittajallu (Kitware), Neal Siekierski (Kitware)</contributor>
+  <contributor>Subin Erattakulangara (Kitware)</contributor>
   <acknowledgements>This work is part of the HistomicsTK project.</acknowledgements>
+   <parameters>
+    <label>AI Model</label>
+    <description>AI Model parameters</description>
+    <string>
+      <name>ai_model</name>
+      <index>0</index>
+      <label>AI Model</label>
+      <description>Docker IP address of hosted AI model. Example: '127.0.0.1:8786'</description>
+      <longflag>ai_model</longflag>
+      <default>http://172.19.0.1:8000/process_tiles/</default>
+    </string>
+    <boolean>
+      <name>send_image_tiles</name>
+      <label>Image tiles</label>
+      <description>Select all the types of data that need to be send to the ML API</description>
+      <longflag>rsend_image_tiles</longflag>
+      <default>True</default>
+    </boolean>
+    <boolean>
+      <name>send_mask_tiles</name>
+      <label>Nuclei mask</label>
+      <description></description>
+      <longflag>send_mask_tiles</longflag>
+      <default>True</default>
+    </boolean>
+      <boolean>
+      <name>send_nuclei_annotations</name>
+      <label>Nuclei annotations</label>
+      <description></description>
+      <longflag>send_nuclei_annotations</longflag>
+      <default>True</default>
+    </boolean>
+    <boolean>
+      <name>receive_nuclei_class</name>
+      <label>Nuclei Classification output</label>
+      <description>Select all the types of data that need to be received from the ML API</description>
+      <longflag>receive_nuclei_class</longflag>
+      <default>True</default>
+    </boolean>
+    <boolean>
+      <name>receive_nuclei_annotations</name>
+      <label>Nuclei annotation output</label>
+      <description></description>
+      <longflag>receive_nuclei_annotations</longflag>
+      <default>False</default>
+    </boolean>
+  </parameters>
   <parameters>
     <label>IO</label>
     <description>Input/output parameters</description>
@@ -41,13 +88,6 @@
       <channel>output</channel>
       <index>1</index>
     </file>
-    <string>
-      <name>ai_model</name>
-      <label>AI Model</label>
-      <description>Docker IP address of hosted AI model. Example: '127.0.0.1:8786'</description>
-      <longflag>ai_model</longflag>
-      <default></default>
-    </string>
   </parameters>
   <parameters advanced="true">
     <label>Color Normalization</label>
@@ -129,7 +169,7 @@
       <description>Custom value for stain-3</description>
     </double-vector>
   </parameters>
-  <parameters>
+  <parameters advanced="true">
     <label>Nuclei segmentation</label>
     <description>Nuclei segmentation parameters</description>
     <double>

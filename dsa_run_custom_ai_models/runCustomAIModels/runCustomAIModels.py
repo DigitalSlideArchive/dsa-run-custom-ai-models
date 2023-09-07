@@ -4,19 +4,18 @@ import os
 import pprint
 import time
 from pathlib import Path
-import requests
-
-import large_image
-import numpy as np
 
 import histomicstk
+import histomicstk.preprocessing.color_deconvolution as htk_cdeconv
 import histomicstk.preprocessing.color_normalization as htk_cnorm
 import histomicstk.segmentation.label as htk_seg_label
 import histomicstk.segmentation.nuclear as htk_nuclear
 import histomicstk.utils as htk_utils
+import large_image
+import numpy as np
+import requests
 from histomicstk.cli import utils as cli_utils
 from histomicstk.cli.utils import CLIArgumentParser
-import histomicstk.preprocessing.color_deconvolution as htk_cdeconv
 
 logging.basicConfig(level=logging.CRITICAL)
 
@@ -63,7 +62,8 @@ def validate_args(args):
         raise ValueError('Analysis ROI must be a vector of 4 elements.')
 
 
-def process_wsi_as_whole_image(ts, invert_image=False, args=None, default_img_inversion=False):
+def process_wsi_as_whole_image(
+        ts, invert_image=False, args=None, default_img_inversion=False):
     print('\n>> Computing tissue/foreground mask at low-res ...\n')
 
     start_time = time.time()
@@ -125,7 +125,8 @@ def process_wsi(ts, it_kwargs, args, im_fgnd_mask_lres=None,
     return tile_fgnd_frac_list
 
 
-def compute_reinhard_norm(args, invert_image=False, default_img_inversion=False):
+def compute_reinhard_norm(args, invert_image=False,
+                          default_img_inversion=False):
     print('\n>> Computing reinhard color normalization stats ...\n')
 
     start_time = time.time()
@@ -140,15 +141,18 @@ def compute_reinhard_norm(args, invert_image=False, default_img_inversion=False)
         cli_utils.disp_time_hms(rstats_time)))
     return src_mu_lab, src_sigma_lab
 
-def generate_mask(im_tile, args,src_mu_lab, src_sigma_lab):
-        # Flags
+
+def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
+    # Flags
     single_channel = False
     invert_image = False
 
     # get tile image & check number of channels
-    single_channel = len(im_tile['tile'].shape) <= 2 or im_tile['tile'].shape[2] == 1
+    single_channel = len(
+        im_tile['tile'].shape) <= 2 or im_tile['tile'].shape[2] == 1
     if single_channel:
-        im_tile = np.dstack((im_tile['tile'], im_tile['tile'], im_tile['tile']))
+        im_tile = np.dstack(
+            (im_tile['tile'], im_tile['tile'], im_tile['tile']))
         if args.ImageInversionForm == "Yes":
             invert_image = True
     else:
@@ -212,45 +216,83 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             src_mu_lab, src_sigma_lab, invert_image=invert_image,
             default_img_inversion=default_img_inversion,
         )
-        tile_nuclei_list.append(cur_nuclei_list)
-
+        # Generate nuclei mask.
         nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
-        print('>>mask data', nuclei_mask.shape, tile['tile'].shape)
 
-        if args.ai_model:
-            gx, gy, gh, gw  = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth']
-            try:
-                payload = {"image": np.asarray(tile['tile'][:,:,:3]).tolist(), "mask": np.asarray(nuclei_mask).tolist(), "nuclei":cur_nuclei_list, "tilesize":(gx,gy, gh,gw)}
-                response = requests.post(args.ai_model, json=payload)
-                if response.status_code == 200:
-                    tile_nuclei_class.append(response.json().get("nuclei"))
-                else:
-                    print(f"Request failed with status code: {response.status_code}")
-                    tile_nuclei_class.append([])
-            except requests.exceptions.RequestException as e:
-                print(f"Request error: {e}")
-            except Exception as e:
-                print(f"Error: {e}")
+        # Extract tile information.
+        gx, gy, gh, gw, h, w = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth'], tile['height'], tile['width']
 
-    nuclei_list = [anot
-                   for anot_list, _ in tile_nuclei_list for anot in anot_list]
-    
-    class_list = [clss for clss_list in tile_nuclei_class for clss in clss_list]
+        # Prepare payload for HTTP request.
+        payload = {}
 
-    #assign color to the outline
-    curated_nuclei_list = []
-    colormap = {0:'rgb(0,0,255)',
-                1:'rgb(0,255,0)',
-                2:'rgb(255,0,0)',
-                3:'rgb(255,255,0)',
-                4:'rgb(255,0,255)'}
-    for i in range(len(nuclei_list)):
-        colorClass = class_list[i]
-        nuclei_list[i]['lineColor'] = colormap[colorClass]
-        curated_nuclei_list.append(nuclei_list[i])
-    
-    print('len of tile nuclei and classes ', len(class_list))
-    print(class_list)
+        # Include image data in payload if specified.
+        if args.send_image_tiles:
+            payload["image"] = np.asarray(tile['tile'][:, :, :3]).tolist()
+
+        # Include mask data in payload if specified.
+        if args.send_mask_tiles:
+            payload["mask"] = np.asarray(nuclei_mask).tolist()
+
+        # Include nuclei annotations in payload if specified.
+        if args.send_nuclei_annotations:
+            payload["nuclei"] = cur_nuclei_list
+
+        # Include tile size information in payload.
+        payload["tilesize"] = (gx, gy, gh, gw, h, w)
+
+        try:
+            # Send the HTTP POST request.
+            response = requests.post(args.ai_model, json=payload)
+
+            if response.status_code == 200:
+                # Handle response data if successful.
+                if args.receive_nuclei_class:
+                    tile_nuclei_class.append(
+                        response.json().get("network_output"))
+                if args.receive_nuclei_annotations:
+                    tile_nuclei_list.append(
+                        response.json().get("network_output"))
+            else:
+                # Handle request failure.
+                print(
+                    f"Request failed with status code: {response.status_code}")
+                tile_nuclei_class.append([])
+        except requests.exceptions.RequestException as e:
+            # Handle request exception.
+            print(f"Request error: {e}")
+        except Exception as e:
+            # Handle other exceptions.
+            print(f"Error: {e}")
+
+        # Append tile's nuclei annotations if not already received.
+        if not args.receive_nuclei_annotations:
+            tile_nuclei_list.append(cur_nuclei_list)
+
+        # Flatten the list of nuclei annotations.
+        nuclei_list = [
+            anot for anot_list,
+            _ in tile_nuclei_list for anot in anot_list]
+
+        if args.receive_nuclei_class:
+            curated_nuclei_list = []
+            # Extract and assign colors to nuclei outlines based on classes.
+            class_list = [
+                clss for clss_list in tile_nuclei_class for clss in clss_list]
+
+            colormap = {
+                0: 'rgb(0,0,255)',
+                1: 'rgb(0,255,0)',
+                2: 'rgb(255,0,0)',
+                3: 'rgb(255,255,0)',
+                4: 'rgb(255,0,255)'}
+
+            for i in range(len(nuclei_list)):
+                colorClass = class_list[i]
+                nuclei_list[i]['lineColor'] = colormap[colorClass]
+                curated_nuclei_list.append(nuclei_list[i])
+            print(f'len of tile nuclei and classes: {len(class_list)}')
+        else:
+            curated_nuclei_list = tile_nuclei_list
 
     nuclei_detection_time = time.time() - start_time
 
@@ -373,7 +415,8 @@ def main(args):
             format=large_image.tilesource.TILE_FORMAT_NUMPY,
             frame=args.frame)
         # get tile image & check number of channels
-        single_channel = len(tile_info['tile'].shape) <= 2 or tile_info['tile'].shape[2] == 1
+        single_channel = len(
+            tile_info['tile'].shape) <= 2 or tile_info['tile'].shape[2] == 1
         if not single_channel:
             src_mu_lab, src_sigma_lab = compute_reinhard_norm(
                 args, invert_image=invert_image, default_img_inversion=default_img_inversion)
@@ -403,7 +446,9 @@ def main(args):
             nuclei_list, args.nuclei_annotation_format)
         nuclei_removal_setup_time = time.time() - nuclei_removal_start_time
 
-        print('Number of nuclei after overlap removal {}'.format(len(nuclei_list)))
+        print(
+            'Number of nuclei after overlap removal {}'.format(
+                len(nuclei_list)))
         print('Nuclei removal processing time = {}'.format(
             cli_utils.disp_time_hms(nuclei_removal_setup_time)))
 
@@ -428,7 +473,13 @@ def main(args):
     }
 
     with open(args.outputNucleiAnnotationFile, 'w') as annotation_file:
-        json.dump(annotation, annotation_file, separators=(',', ':'), sort_keys=False)
+        json.dump(
+            annotation,
+            annotation_file,
+            separators=(
+                ',',
+                ':'),
+            sort_keys=False)
 
     total_time_taken = time.time() - total_start_time
 

@@ -6,6 +6,7 @@ from PIL import Image
 from scipy.io import loadmat
 import json
 import torch.nn.functional as F
+import cv2
 
 def run_ai_model_inferencing(json_data):
     image_data = json_data.get("image")
@@ -38,28 +39,36 @@ def run_ai_model_inferencing(json_data):
     # mask =
     img = image#np.asarray(image)
     instances = mask
-    print('image and mask shape',img.shape, mask.shape)
     nucleiClass = []
-    gx, gy, gh, gw = size_data[0], size_data[1], size_data[2], size_data[3]
-    print('gx gy',gx, gy, gh, gw)
+    gx, gy, gh, gw, h, w  = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
+    wfrac = gw / np.double(w)
+    hfrac = gh / np.double(h)
+    #print('image and mask shape',img.shape, mask.shape, h, w)
 
     patch_size = 128
     for element in annot_data[0]:
         xr, yr = element['center'][0], element['center'][1]
-        print('xr yr',xr, yr)
         x = xr - (gx + gw / 2)
-        y = yr - (gy - gh / 2)
+        y = yr - (gy + gh / 2)
         x_start = int(max(x - patch_size / 2, 0))
         y_start = int(max(y - patch_size / 2, 0))
-        x_end = int(x_start + patch_size) # Ensure within image boundaries
-        y_end = int(y_start + patch_size)  # Ensure within image boundaries
-        print('start and end',x_start,x_end,y_start, y_end)
+        x_end = int(x_start + patch_size)# Ensure within image boundaries
+        y_end = int(y_start + patch_size) # Ensure within image boundaries
+        
 
         # Crop the image and label
         cropped_image_np = img[x_start: x_end, y_start: y_end, :]
         cropped_label_np = instances[x_start: x_end, y_start: y_end]
+        # print('global',gx, gy, gh, gw, h, w)
+        # np.save('image.npy', img)
+        # np.save('mask.npy', instances)
+        # np.save('props.npy', np.asarray(element))
+        # np.save('global.npy', np.asarray(size_data))
 
-        if cropped_image_np.shape[0] == 128 and cropped_image_np.shape[1] == 128 and cropped_image_np.shape[2] == 3:
+        if cropped_image_np.shape[0] != 0 and cropped_image_np.shape[1] != 0 and cropped_image_np.shape[2] == 3:
+            if cropped_image_np.shape[0] != 128 or cropped_image_np.shape[1] != 128:
+                cropped_image_np = cv2.resize(cropped_image_np.astype(np.uint8), (128,128))
+                cropped_label_np = cv2.resize(cropped_label_np.astype(np.uint8),(128,128))
 
             # Cropped Label
             zero_channel = torch.from_numpy(cropped_label_np.astype(np.float32)).unsqueeze(-1)
@@ -84,6 +93,7 @@ def run_ai_model_inferencing(json_data):
                 out = torch.argmax(out, dim=0)
                 nucleiClass.append(out.item())
         else:
+            print('skipped', cropped_image_np.shape, y_start, y_end)
             nucleiClass.append(4)
     print(nucleiClass)           
     return nucleiClass
