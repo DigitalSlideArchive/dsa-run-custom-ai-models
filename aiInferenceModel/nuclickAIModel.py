@@ -7,6 +7,10 @@ from scipy.io import loadmat
 import json
 import torch.nn.functional as F
 import cv2
+from monai.transforms import LoadImaged, EnsureChannelFirstd, Compose, ScaleIntensityRangeD
+from monai.data import PILReader
+from monai.apps.nuclick.transforms import AddLabelAsGuidanced
+import matplotlib.pyplot as plt
 
 def run_ai_model_inferencing(json_data):
     image_data = json_data.get("image")
@@ -31,18 +35,11 @@ def run_ai_model_inferencing(json_data):
     checkpoint = torch.load(model_weights_path, map_location=torch.device(device))
     model_state_dict = checkpoint.get("model", checkpoint)
     network.load_state_dict(model_state_dict, strict=True)
-
-    #image = Image.open(image_file).convert("RGB")
-    #m = loadmat(label_mat)
-    #instances = m["inst_map"]
     
-    # mask =
-    img = image#np.asarray(image)
+    img = image
     instances = mask
     nucleiClass = []
     gx, gy, gh, gw, h, w  = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
-    wfrac = gw / np.double(w)
-    hfrac = gh / np.double(h)
     #print('image and mask shape',img.shape, mask.shape, h, w)
 
     patch_size = 128
@@ -59,36 +56,25 @@ def run_ai_model_inferencing(json_data):
         # Crop the image and label
         cropped_image_np = img[x_start: x_end, y_start: y_end, :]
         cropped_label_np = instances[x_start: x_end, y_start: y_end]
-        # print('global',gx, gy, gh, gw, h, w)
-        # np.save('image.npy', img)
-        # np.save('mask.npy', instances)
-        # np.save('props.npy', np.asarray(element))
-        # np.save('global.npy', np.asarray(size_data))
-
+        
         if cropped_image_np.shape[0] != 0 and cropped_image_np.shape[1] != 0 and cropped_image_np.shape[2] == 3:
             if cropped_image_np.shape[0] != 128 or cropped_image_np.shape[1] != 128:
                 cropped_image_np = cv2.resize(cropped_image_np.astype(np.uint8), (128,128))
                 cropped_label_np = cv2.resize(cropped_label_np.astype(np.uint8),(128,128))
-
-            # Cropped Label
-            zero_channel = torch.from_numpy(cropped_label_np.astype(np.float32)).unsqueeze(-1)
-
-            # Zero label
-            # zero_channel = torch.zeros(128, 128, 1)
-            cropped_image_np = torch.cat((torch.from_numpy(cropped_image_np), zero_channel), dim=2)
-
-            # Convert to torch tensors
-            cropped_img = cropped_image_np.permute(2, 0, 1).unsqueeze(0)
-            cropped_label = torch.from_numpy(cropped_label_np).unsqueeze(-1)
-
-            # Ensure data types
-            cropped_img = cropped_img.float()  # Convert to float if not already
-            cropped_label = cropped_label.long()  # Assuming it's a label
-
-            # Perform network inference
+            cv2.imwrite('image.png', cropped_image_np)
+            plt.imsave('mask.png', cropped_label_np)
+            transforms = Compose([
+                            LoadImaged(keys="image", dtype=np.uint8, reader=PILReader(converter=lambda im: im.convert("RGB"))),
+                            LoadImaged(keys="label", dtype=np.uint8, reader=PILReader(converter=lambda im: im.convert("L"))),
+                            EnsureChannelFirstd(keys=("image", "label")),
+                            ScaleIntensityRangeD(keys="image", a_min=0.0, a_max=255.0, b_min=-1.0, b_max=1.0),
+                            AddLabelAsGuidanced(keys="image", source="label"),])
+            
+            input_data = {"image": 'image.png', "label":'mask.png'}
+            output_data = transforms(input_data)
             network.eval()
             with torch.no_grad():
-                pred = network(cropped_img)[0]
+                pred = network(output_data["image"][None])[0]
                 out = F.softmax(pred, dim=0)
                 out = torch.argmax(out, dim=0)
                 nucleiClass.append(out.item())
