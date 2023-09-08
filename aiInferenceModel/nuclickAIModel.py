@@ -39,28 +39,32 @@ def run_ai_model_inferencing(json_data):
     img = image
     instances = mask
     nucleiClass = []
-    gx, gy, gh, gw, h, w  = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
+    gx, gy, gh, gw, xc, yc  = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
     #print('image and mask shape',img.shape, mask.shape, h, w)
 
-    patch_size = 128
+    patch_size = 64
     for element in annot_data[0]:
-        xr, yr = element['center'][0], element['center'][1]
-        x = xr - (gx + gw / 2)
-        y = yr - (gy + gh / 2)
+        xr, yr, xw, yh = element['center'][0], element['center'][1], element['width'], element['height']
+        x = xr - xc
+        y = yr - yc
         x_start = int(max(x - patch_size / 2, 0))
         y_start = int(max(y - patch_size / 2, 0))
         x_end = int(x_start + patch_size)# Ensure within image boundaries
         y_end = int(y_start + patch_size) # Ensure within image boundaries
-        
+
+        #remove any unwanted labels
+        zero_label = np.zeros(instances.shape)
+        zero_label[int(y-yh/2):int(y+yh/2),int(x-xw/2):int(x+xw/2)] = 1
+        localized = instances * zero_label
 
         # Crop the image and label
-        cropped_image_np = img[x_start: x_end, y_start: y_end, :]
-        cropped_label_np = instances[x_start: x_end, y_start: y_end]
+        cropped_image_np = img[y_start: y_end, x_start: x_end, :]
+        cropped_label_np = localized[y_start: y_end,x_start: x_end]
         
-        if cropped_image_np.shape[0] != 0 and cropped_image_np.shape[1] != 0 and cropped_image_np.shape[2] == 3:
-            if cropped_image_np.shape[0] != 128 or cropped_image_np.shape[1] != 128:
-                cropped_image_np = cv2.resize(cropped_image_np.astype(np.uint8), (128,128))
-                cropped_label_np = cv2.resize(cropped_label_np.astype(np.uint8),(128,128))
+        if cropped_image_np.shape[0] == 64 and cropped_image_np.shape[1] == 64 and cropped_image_np.shape[2] == 3:
+            # if cropped_image_np.shape[0] != 128 or cropped_image_np.shape[1] != 128:
+            cropped_image_np = cv2.resize(cropped_image_np.astype(np.uint8), (128,128))
+            cropped_label_np = cv2.resize(cropped_label_np.astype(np.uint8),(128,128))
             cv2.imwrite('image.png', cropped_image_np)
             plt.imsave('mask.png', cropped_label_np)
             transforms = Compose([

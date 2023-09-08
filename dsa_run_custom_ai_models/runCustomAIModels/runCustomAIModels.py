@@ -220,7 +220,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
 
         # Extract tile information.
-        gx, gy, gh, gw, h, w = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth'], tile['height'], tile['width']
+        gx, gy, gh, gw, x, y = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth'], tile['x'], tile['y']
 
         # Prepare payload for HTTP request.
         payload = {}
@@ -238,7 +238,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             payload["nuclei"] = cur_nuclei_list
 
         # Include tile size information in payload.
-        payload["tilesize"] = (gx, gy, gh, gw, h, w)
+        payload["tilesize"] = (gx, gy, gh, gw, x, y)
 
         try:
             # Send the HTTP POST request.
