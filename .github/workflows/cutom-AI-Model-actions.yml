@@ -2,11 +2,20 @@ name: DSA AI adaptor
 run-name: Check deployment
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  DSA Module:
     runs-on: ubuntu-latest
     steps:
       - name: Build docker image
         uses: actions/checkout@v3
       - run: echo "💡 Building images and starting up docker--"
       - run: docker build -t dsarchive/runcustomaimodel .
+      - run: echo "🍏 docker build sucessful"
+  AI Models:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build docker image
+        uses: actions/checkout@v3
+      - run: echo "💡 Building images and starting up docker--"
+      - run: docker build -t dsaiadapter/nuclick ./aiInferenceModel
+      - run: docker run --publish 8016:80 --name  nuclick dsaiadapter/nuclick
       - run: echo "🍏 docker build sucessful"
