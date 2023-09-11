@@ -285,6 +285,13 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
                 2: 'rgb(255,0,0)',
                 3: 'rgb(255,255,0)',
                 4: 'rgb(255,0,255)'}
+            classnames = {
+                0: "Other-Blue",
+                1: "Inflammatory-Green",
+                2: "Epithelial-Red",
+                3: "Spindle-Shaped-Yellow",
+                4: 'Cannot-be-processed-Pink'
+            }
 
             for i in range(len(nuclei_list)):
                 colorClass = class_list[i]
