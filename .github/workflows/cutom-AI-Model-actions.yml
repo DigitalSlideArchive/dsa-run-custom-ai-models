@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build docker image
+        uses: actions/checkout@v3
       - run: echo "💡 Building images and starting up docker--"
       - run: docker build -t dsarchive/runcustomaimodel .
       - run: echo "🍏 docker build sucessful"
