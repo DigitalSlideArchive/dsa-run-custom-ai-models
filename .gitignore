@@ -1,7 +1,3 @@
 __pycache__/
 aiInferenceModel/__pycache__
-TESTING.ipynb
-aiInferenceModel/test_1.csv
-aiInferenceModel/test_1.json
-aiInferenceModel/test_1.png
-aiInferenceModel/test_1.mat
+debug

@@ -7,3 +7,6 @@ torch
 monai
 pillow
 scipy
+temp
+opencv-python-headless
+matplotlib

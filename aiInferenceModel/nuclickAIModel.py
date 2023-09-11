@@ -1,18 +1,20 @@
+import json
 import os
+import tempfile
+
+import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.nn.functional as F
+from monai.apps.nuclick.transforms import AddLabelAsGuidanced
+from monai.data import PILReader
 from monai.networks.nets import DenseNet121
+from monai.transforms import (Compose, EnsureChannelFirstd, LoadImaged,
+                              ScaleIntensityRangeD, Transform)
 from PIL import Image
 from scipy.io import loadmat
-import json
-import torch.nn.functional as F
-import cv2
-from monai.transforms import LoadImaged, EnsureChannelFirstd, Compose, ScaleIntensityRangeD
-from monai.data import PILReader
-from monai.apps.nuclick.transforms import AddLabelAsGuidanced
-import matplotlib.pyplot as plt
-from monai.transforms import Transform
-import tempfile
+
 
 class BinarizeImage(Transform):
     """
@@ -45,6 +47,8 @@ def run_ai_model_inferencing(json_data):
     mask = np.array(mask_data)
     mask = (mask > 0).astype(np.uint8)
     model_weights_path = "./models/nuclick.pt"
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
 
     class_names = {
         "0": "Other",
@@ -85,8 +89,8 @@ def run_ai_model_inferencing(json_data):
         if cropped_image_np.shape[0] == patch_size and cropped_image_np.shape[1] == patch_size and cropped_image_np.shape[2] == 3:
             cropped_image_np = cv2.resize(cropped_image_np.astype(np.uint8), (128,128))
             cropped_label_np = cv2.resize(cropped_label_np.astype(np.uint8),(128,128))
-            cv2.imwrite('image.png', cropped_image_np)
-            plt.imsave('mask.png', cropped_label_np)
+            cv2.imwrite(os.path.join(temp_dir,'image.png'), cropped_image_np)
+            plt.imsave(os.path.join(temp_dir,'label.png'), cropped_label_np)
 
             transforms = Compose([
                 LoadImaged(keys="image", dtype=np.uint8, reader=PILReader(converter=lambda im: im.convert("RGB"))),
@@ -97,7 +101,7 @@ def run_ai_model_inferencing(json_data):
                 AddLabelAsGuidanced(keys="image", source="label"),
             ])
             
-            input_data = {"image": 'image.png', "label":'mask.png'}
+            input_data = {"image": os.path.join(temp_dir,'image.png'), "label":os.path.join(temp_dir,'label.png')}
             output_data = transforms(input_data)
 
             network.eval()
