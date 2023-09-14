@@ -225,6 +225,10 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         # Prepare payload for HTTP request.
         payload = {}
 
+        # Include nuclei center in payload if specified
+        if args.nuclei_location:
+            payload["nuclei_location"] = args.nuclei_location
+
         # Include image data in payload if specified.
         if args.send_image_tiles:
             payload["image"] = np.asarray(tile['tile'][:, :, :3]).tolist()
@@ -269,7 +273,11 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             tile_nuclei_list.append(cur_nuclei_list)
 
         # Flatten the list of nuclei annotations.
-        nuclei_list = [
+        if args.receive_nuclei_annotations:
+            nuclei_list = [
+            anot for anot_list in tile_nuclei_list for anot in anot_list]
+        else:
+            nuclei_list = [
             anot for anot_list,
             _ in tile_nuclei_list for anot in anot_list]
 
@@ -299,7 +307,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
                 curated_nuclei_list.append(nuclei_list[i])
             print(f'len of tile nuclei and classes: {len(class_list)}')
         else:
-            curated_nuclei_list = tile_nuclei_list
+            curated_nuclei_list = nuclei_list
 
     nuclei_detection_time = time.time() - start_time
 
