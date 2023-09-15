@@ -196,6 +196,12 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
     print('\n>> Detecting nuclei ...\n')
 
+    #Selecting the ai model
+    if args.prebuild_ai_models =="Nuclick_Classification":
+        network_location = 'http://172.19.0.1:8000/nuclick_classification/'
+    if args.prebuild_ai_models =="Nuclick_Segmentation":
+        network_location = 'http://172.19.0.1:8000/nuclick_segmentation/'
+
     start_time = time.time()
 
     tile_nuclei_list = []
@@ -246,7 +252,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
         try:
             # Send the HTTP POST request.
-            response = requests.post(args.ai_model, json=payload)
+            response = requests.post(network_location, json=payload)
 
             if response.status_code == 200:
                 # Handle response data if successful.
@@ -361,21 +367,6 @@ def main(args):
         raise Exception("The given frame value is not an integer")
     else:
         it_kwargs['frame'] = args.frame
-
-    #
-    # Initiate Dask client
-    #
-    print('\n>> Creating Dask client ...\n')
-
-    start_time = time.time()
-
-    c = cli_utils.create_dask_client(args)
-
-    print(c)
-
-    dask_setup_time = time.time() - start_time
-    print('Dask setup time = {}'.format(
-        cli_utils.disp_time_hms(dask_setup_time)))
 
     #
     # color inversion flag

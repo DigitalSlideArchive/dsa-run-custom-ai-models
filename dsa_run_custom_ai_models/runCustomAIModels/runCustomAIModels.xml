@@ -11,18 +11,27 @@
    <parameters>
     <label>AI Model</label>
     <description>AI Model parameters</description>
+    <string-enumeration>
+      <name>prebuild_ai_models</name>
+      <label>Select pre-build AI models</label>
+      <description>Select from list of pre-build ai models</description>
+      <longflag>prebuild_ai_models</longflag>
+      <element>Nuclick_Classification</element>
+      <element>Nuclick_Segmentation</element>
+      <default>Nuclick_Segmentation</default>
+    </string-enumeration>
     <string>
       <name>ai_model</name>
       <index>0</index>
-      <label>AI Model</label>
-      <description>Docker IP address of hosted AI model. Example: '127.0.0.1:8786'</description>
+      <label>Load docker models (optional)</label>
+      <description>Docker IP address of hosted AI model. Example: 'http://172.19.0.1:8000/nuclick_classification/'</description>
       <longflag>ai_model</longflag>
-      <default>http://172.19.0.1:8000/process_tiles/</default>
+      <default></default>
     </string>
     <string>
       <name>nuclei_location</name>
       <label></label>
-      <description>Provide nuclei location for segmentation. Example:[[x1,y1],[x2,y2]] </description>
+      <description>Provide nuclei location for segmentation (optional). Example:[[x1,y1],[x2,y2]]. Used for Nuclick nuclei segmentation.  </description>
       <longflag>nuclei_location</longflag>
       <default>[[130,29],[130,30]]</default>
     </string>
