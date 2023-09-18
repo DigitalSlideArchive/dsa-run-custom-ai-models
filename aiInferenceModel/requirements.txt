@@ -10,3 +10,4 @@ scipy
 temp
 opencv-python-headless
 matplotlib
+scikit-image

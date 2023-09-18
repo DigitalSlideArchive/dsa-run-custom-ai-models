@@ -1,3 +1,4 @@
 __pycache__/
 aiInferenceModel/__pycache__
 debug
+pre-commit.sh

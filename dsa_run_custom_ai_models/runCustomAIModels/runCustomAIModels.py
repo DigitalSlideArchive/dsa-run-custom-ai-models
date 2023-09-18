@@ -196,10 +196,10 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
     print('\n>> Detecting nuclei ...\n')
 
-    #Selecting the ai model
-    if args.prebuild_ai_models =="Nuclick_Classification":
+    # Selecting the ai model
+    if args.prebuild_ai_models == "Nuclick_Classification":
         network_location = 'http://172.19.0.1:8000/nuclick_classification/'
-    if args.prebuild_ai_models =="Nuclick_Segmentation":
+    if args.prebuild_ai_models == "Nuclick_Segmentation":
         network_location = 'http://172.19.0.1:8000/nuclick_segmentation/'
 
     start_time = time.time()
@@ -226,8 +226,9 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
 
         # Extract tile information.
-        gx, gy, gh, gw, x, y = tile['gx'], tile['gy'], tile['gheight'], tile['gwidth'], tile['x'], tile['y']
-
+        gx, gy, gh, gw, x, y, h, w = tile['gx'], tile['gy'], tile['gheight'], tile[
+            'gwidth'], tile['x'], tile['y'], tile['height'], tile['width']
+        print(gx, gy, gh, gw, x, y, h, w)
         # Prepare payload for HTTP request.
         payload = {}
 
@@ -281,11 +282,11 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         # Flatten the list of nuclei annotations.
         if args.receive_nuclei_annotations:
             nuclei_list = [
-            anot for anot_list in tile_nuclei_list for anot in anot_list]
+                anot for anot_list in tile_nuclei_list for anot in anot_list]
         else:
             nuclei_list = [
-            anot for anot_list,
-            _ in tile_nuclei_list for anot in anot_list]
+                anot for anot_list,
+                _ in tile_nuclei_list for anot in anot_list]
 
         if args.receive_nuclei_class:
             curated_nuclei_list = []

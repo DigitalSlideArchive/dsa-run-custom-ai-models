@@ -1,6 +1,5 @@
 import os
 import tempfile
-import asyncio
 
 import cv2
 import numpy as np
@@ -21,7 +20,7 @@ def run_ai_model_inferencing(json_data):
     size_data = json_data.get("tilesize")
     image = np.array(image_data)
     model_weights_path = "./models/nuclickSegmentation.pt"
-    #model_weights_path = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/aiInferenceModel/models/nuclickSegmentation.pt"
+    # model_weights_path = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/aiInferenceModel/models/nuclickSegmentation.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -104,19 +103,21 @@ def run_ai_model_inferencing(json_data):
                 nuclei_obj_props[i].bbox[0] + 1
             print(cx, cy, width, height)
 
-            #generate contours
+            # generate contours
             zero_image = np.zeros(output_predictions["pred"].shape)
-            print(zero_image.shape,int(cx-width/2),int(cx+width/2), int(cy-height/2),int(cy + height/2))
+            print(zero_image.shape,
+                  int(cx - width / 2),
+                  int(cx + width / 2),
+                  int(cy - height / 2),
+                  int(cy + height / 2))
 
             zero_image[int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)] = output_predictions["pred"][int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)]
             contours, _ = cv2.findContours(zero_image.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            
-
-            
-            output_list = [[[x[0][1], x[0][0], 0] for x in arr.tolist()] for arr in list(contours)]
+            output_list = [[[x[0][1], x[0][0], 0]
+                            for x in arr.tolist()] for arr in list(contours)]
             print('output', type(output_list), output_list, contours)
-            #output_contour = [x,y,0 for x, y in contours]
+            # output_contour = [x,y,0 for x, y in contours]
 
             # create annotation json
             for record in output_list:
@@ -126,7 +127,7 @@ def run_ai_model_inferencing(json_data):
                     'closed': True,
                     'fillColor': 'rgba(0,0,0,0)',
                     'lineColor': 'rgb(0,255,0)',
-                    'group':'x'
+                    'group': 'x'
                 }
 
                 nuclei_annot_list.append(cur_annot)
@@ -134,7 +135,9 @@ def run_ai_model_inferencing(json_data):
 
 
 if __name__ == "__main__":
-    image_file = os.path.join('/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/workspace/', 'test_12.png')
+    image_file = os.path.join(
+        '/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/workspace/',
+        'test_12.png')
     foreground = [[190, 15], [218, 32], [296, 96]]
     reader = PILReader(converter=lambda im: im.convert("RGB"))
     image_np = LoadImage(

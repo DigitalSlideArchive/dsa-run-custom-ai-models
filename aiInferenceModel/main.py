@@ -1,8 +1,7 @@
-from fastapi import FastAPI, HTTPException, Request
-
 # Import AI model modules
 import nuclickClassification as classificationModel
 import nuclickSegmentation as segmentationModel
+from fastapi import FastAPI, HTTPException, Request
 
 # You can import your custom AI models into this code
 # Example: import customSegmentationModel as segmentationModel2

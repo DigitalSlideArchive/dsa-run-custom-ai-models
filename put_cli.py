@@ -63,7 +63,8 @@ def install_cli(client, imageName):
     :param client: girder client.
     :param imageName: name of the CLI docker image
     """
-    client.put('slicer_cli_web/docker_image', data={'name': '["%s"]' % imageName})
+    client.put('slicer_cli_web/docker_image',
+               data={'name': '["%s"]' % imageName})
     job = client.get('job/all', parameters={
         'sort': 'created', 'sortdir': -1,
         'types': '["slicer_cli_web_job"]',

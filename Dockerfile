@@ -12,8 +12,8 @@ RUN apt-get update && \
 
 COPY . /opt/scw
 WORKDIR /opt/scw
-RUN --mount=type=cache,target=/root/.cache/pip python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels
-RUN --mount=type=cache,target=/root/.cache/pip python -m pip install -e . --find-links https://girder.github.io/large_image_wheels
+RUN python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels
+RUN python -m pip install -e . --find-links https://girder.github.io/large_image_wheels
 
 # Use a newer histomicstk
 # Not needed if we install histomicstk from pypi
