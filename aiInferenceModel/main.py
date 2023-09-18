@@ -25,6 +25,7 @@ async def process_ima(request: Request):
         return {"network_output": network_output}
 
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
 
 # Endpoint for Nuclick AI model segmentation

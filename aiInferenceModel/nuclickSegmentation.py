@@ -114,7 +114,7 @@ def run_ai_model_inferencing(json_data):
             
 
             
-            output_list = [[[x[0][0], x[0][1], 0] for x in arr.tolist()] for arr in list(contours)]
+            output_list = [[[x[0][1], x[0][0], 0] for x in arr.tolist()] for arr in list(contours)]
             print('output', type(output_list), output_list, contours)
             #output_contour = [x,y,0 for x, y in contours]
 
