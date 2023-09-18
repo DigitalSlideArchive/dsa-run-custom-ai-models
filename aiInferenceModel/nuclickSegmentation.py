@@ -1,5 +1,6 @@
 import os
 import tempfile
+import asyncio
 
 import cv2
 import numpy as np
@@ -20,6 +21,7 @@ def run_ai_model_inferencing(json_data):
     size_data = json_data.get("tilesize")
     image = np.array(image_data)
     model_weights_path = "./models/nuclickSegmentation.pt"
+    #model_weights_path = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/aiInferenceModel/models/nuclickSegmentation.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -70,12 +72,6 @@ def run_ai_model_inferencing(json_data):
             'image.png'),
         "foreground": foreground_data}
 
-    # print(
-    #     data["image"].shape,
-    #     type(
-    #         data["image"]),
-    #     type(foreground),
-    #     foreground_data)
     print(type(foreground_data), foreground_data)
     data = pre_transforms(data)
 
@@ -98,7 +94,7 @@ def run_ai_model_inferencing(json_data):
 
     nuclei_annot_list = []
 
-    if len(nuclei_obj_props) > 1:
+    if len(nuclei_obj_props) >= 1:
         for i in range(len(nuclei_obj_props)):
             cx = nuclei_obj_props[i].centroid[1]
             cy = nuclei_obj_props[i].centroid[0]
@@ -108,23 +104,37 @@ def run_ai_model_inferencing(json_data):
                 nuclei_obj_props[i].bbox[0] + 1
             print(cx, cy, width, height)
 
-            cur_bbox = {
-                'type': 'rectangle',
-                'center': [cy, cx, 0],
-                'width': width,
-                'height': height,
-                'rotation': 0,
-                'fillColor': 'rgba(0,0,0,0)',
-                'lineColor': 'rgb(0,255,0)'
-            }
+            #generate contours
+            zero_image = np.zeros(output_predictions["pred"].shape)
+            print(zero_image.shape,int(cx-width/2),int(cx+width/2), int(cy-height/2),int(cy + height/2))
 
-            nuclei_annot_list.append(cur_bbox)
+            zero_image[int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)] = output_predictions["pred"][int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)]
+            contours, _ = cv2.findContours(zero_image.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+            
+
+            
+            output_list = [[[x[0][0], x[0][1], 0] for x in arr.tolist()] for arr in list(contours)]
+            print('output', type(output_list), output_list, contours)
+            #output_contour = [x,y,0 for x, y in contours]
+
+            # create annotation json
+            for record in output_list:
+                cur_annot = {
+                    'type': 'polyline',
+                    'points': record,
+                    'closed': True,
+                    'fillColor': 'rgba(0,0,0,0)',
+                    'lineColor': 'rgb(0,255,0)',
+                    'group':'x'
+                }
+
+                nuclei_annot_list.append(cur_annot)
     return nuclei_annot_list
 
 
 if __name__ == "__main__":
-    image_file = os.path.join('../debug/workspace/', 'test_12.png')
+    image_file = os.path.join('/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/workspace/', 'test_12.png')
     foreground = [[190, 15], [218, 32], [296, 96]]
     reader = PILReader(converter=lambda im: im.convert("RGB"))
     image_np = LoadImage(
