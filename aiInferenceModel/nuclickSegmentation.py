@@ -18,9 +18,9 @@ def run_ai_model_inferencing(json_data):
     image_data = json_data.get("image")
     foreground_data = eval(json_data.get("nuclei_location"))
     size_data = json_data.get("tilesize")
+    gx,gy,_,_,_,_ = size_data
     image = np.array(image_data)
     model_weights_path = "./models/nuclickSegmentation.pt"
-    # model_weights_path = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/aiInferenceModel/models/nuclickSegmentation.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -116,8 +116,6 @@ def run_ai_model_inferencing(json_data):
 
             output_list = [[[x[0][1], x[0][0], 0]
                             for x in arr.tolist()] for arr in list(contours)]
-            print('output', type(output_list), output_list, contours)
-            # output_contour = [x,y,0 for x, y in contours]
 
             # create annotation json
             for record in output_list:
@@ -135,9 +133,8 @@ def run_ai_model_inferencing(json_data):
 
 
 if __name__ == "__main__":
-    image_file = os.path.join(
-        '/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/workspace/',
-        'test_12.png')
+    # Code for running the AI model locally
+    image_file = ""
     foreground = [[190, 15], [218, 32], [296, 96]]
     reader = PILReader(converter=lambda im: im.convert("RGB"))
     image_np = LoadImage(

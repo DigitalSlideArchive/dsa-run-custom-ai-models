@@ -73,7 +73,7 @@ def run_ai_model_inferencing(json_data):
     img = image
     instances = mask
     nucleiClass = []
-    gx, gy, gh, gw, xc, yc = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
+    _, _, _, _, xc, yc = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
 
     patch_size = 64
     for element in annot_data[0]:

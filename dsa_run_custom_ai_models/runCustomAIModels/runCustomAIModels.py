@@ -197,16 +197,22 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
     print('\n>> Detecting nuclei ...\n')
 
     # Selecting the ai model
-    if args.prebuild_ai_models == "Nuclick_Classification":
+    if args.prebuild_ai_models == "Nuclick Classification":
         network_location = 'http://172.19.0.1:8000/nuclick_classification/'
-    if args.prebuild_ai_models == "Nuclick_Segmentation":
+    if args.prebuild_ai_models == "Nuclick Segmentation":
         network_location = 'http://172.19.0.1:8000/nuclick_segmentation/'
+    if args.prebuild_ai_models == "Segment Anything":
+        network_location = 'http://172.19.0.1:8000/segment_anything/'
 
     start_time = time.time()
 
     tile_nuclei_list = []
 
     tile_nuclei_class = []
+
+    # Type of output
+    classficationNetwork = False
+    segmentationNetwork = False
 
     for tile in ts.tileIterator(**it_kwargs):
 
@@ -226,9 +232,9 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
 
         # Extract tile information.
-        gx, gy, gh, gw, x, y, h, w = tile['gx'], tile['gy'], tile['gheight'], tile[
-            'gwidth'], tile['x'], tile['y'], tile['height'], tile['width']
-        print(gx, gy, gh, gw, x, y, h, w)
+        gx, gy, gh, gw, x, y = tile['gx'], tile['gy'], tile['gheight'], tile[
+            'gwidth'], tile['x'], tile['y']
+
         # Prepare payload for HTTP request.
         payload = {}
 
@@ -257,12 +263,15 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
             if response.status_code == 200:
                 # Handle response data if successful.
-                if args.receive_nuclei_class:
+                output = response.json()
+                if "classes" in output:
                     tile_nuclei_class.append(
-                        response.json().get("network_output"))
-                if args.receive_nuclei_annotations:
+                        response.json().get("classes"))
+                    classficationNetwork = True
+                if "annotations" in output:
                     tile_nuclei_list.append(
-                        response.json().get("network_output"))
+                        response.json().get("annotations"))
+                    segmentationNetwork = True
             else:
                 # Handle request failure.
                 print(
@@ -275,20 +284,17 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             # Handle other exceptions.
             print(f"Error: {e}")
 
-        # Append tile's nuclei annotations if not already received.
-        if not args.receive_nuclei_annotations:
-            tile_nuclei_list.append(cur_nuclei_list)
-
         # Flatten the list of nuclei annotations.
-        if args.receive_nuclei_annotations:
+        if segmentationNetwork:
             nuclei_list = [
                 anot for anot_list in tile_nuclei_list for anot in anot_list]
         else:
+            tile_nuclei_list.append(cur_nuclei_list)
             nuclei_list = [
                 anot for anot_list,
                 _ in tile_nuclei_list for anot in anot_list]
 
-        if args.receive_nuclei_class:
+        if classficationNetwork:
             curated_nuclei_list = []
             # Extract and assign colors to nuclei outlines based on classes.
             class_list = [

@@ -1,10 +1,11 @@
 # Import AI model modules
-import nuclickClassification as classificationModel
-import nuclickSegmentation as segmentationModel
+import nuclickClassification
+import nuclickSegmentation
+import samSegmentation
 from fastapi import FastAPI, HTTPException, Request
 
 # You can import your custom AI models into this code
-# Example: import customSegmentationModel as segmentationModel2
+# Example: import customSegmentationModel
 # Then uncomment the Endpoint for custom AI models
 
 app = FastAPI()
@@ -19,9 +20,9 @@ def read_root():
 async def process_ima(request: Request):
     try:
         json_data = await request.json()
-        network_output = classificationModel.run_ai_model_inferencing(
+        network_output = nuclickClassification.run_ai_model_inferencing(
             json_data)
-        return {"network_output": network_output}
+        return {"classes": network_output}
 
     except Exception as e:
         print(e)
@@ -32,12 +33,26 @@ async def process_ima(request: Request):
 async def process_ima(request: Request):
     try:
         json_data = await request.json()
-        network_output = segmentationModel.run_ai_model_inferencing(json_data)
-        return {"network_output": network_output}
+        network_output = nuclickSegmentation.run_ai_model_inferencing(
+            json_data)
+        return {"annotations": network_output}
 
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
+
+# Endpoint for Segment anything AI model segmentation
+@app.post("/segment_anything/")
+async def process_ima(request: Request):
+    try:
+        json_data = await request.json()
+        network_output = samSegmentation.run_ai_model_inferencing(json_data)
+        return {"annotations": network_output}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
+
 
 # Endpoint for custom AI model
 """""
@@ -48,7 +63,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
 
         # Run segmentation model inference
-        network_output = segmentationModel2.run_ai_model_inferencing(json_data)
+        network_output = customSegmentationModel.run_ai_model_inferencing(json_data)
 
         # Return the model's output
         return {"network_output": network_output}

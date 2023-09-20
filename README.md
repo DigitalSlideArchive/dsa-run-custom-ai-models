@@ -29,7 +29,7 @@ docker build --force-rm -t dsarchive/run-custom-ai-models .
 Once the above step is finished add docker model to the DSA by providing the docker name 'dsarchive/run-custom-ai-models'
 
 
-2. **AI API**: Deploys AI models seperately as a servie. Users can add or remove AI models from this codebase
+2. **AI API**: Deploys AI models seperately as a service. Users can add or remove AI models from this codebase.
 Following are the steps needed to setup the API
 
 ```shell
@@ -37,11 +37,11 @@ cd aiInferenceModel
 ```
 
 ```shell
-docker build -t dsarchive/nuclick .
+docker build -t dsarchive/aimodels .
 ```
 
 ```shell
-docker run -t -d -p 8017:80 --name  nuclick14 dsarchive/nuclick 
+docker run -t -d -p 8017:80 --name  aimodels dsarchive/aimodels 
 ```
 
 ## How it Works
