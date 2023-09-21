@@ -16,7 +16,7 @@ from skimage.measure import label, regionprops
 def run_ai_model_inferencing(json_data):
     print(json_data.keys())
     image_data = json_data.get("image")
-    foreground_data = eval(json_data.get("nuclei_location"))
+    foreground_data = json_data.get("nuclei_location")
     size_data = json_data.get("tilesize")
     gx,gy,_,_,_,_ = size_data
     image = np.array(image_data)
@@ -71,7 +71,6 @@ def run_ai_model_inferencing(json_data):
             'image.png'),
         "foreground": foreground_data}
 
-    print(type(foreground_data), foreground_data)
     data = pre_transforms(data)
 
     # prediction
@@ -101,15 +100,9 @@ def run_ai_model_inferencing(json_data):
                 nuclei_obj_props[i].bbox[1] + 1
             height = nuclei_obj_props[i].bbox[2] - \
                 nuclei_obj_props[i].bbox[0] + 1
-            print(cx, cy, width, height)
 
             # generate contours
             zero_image = np.zeros(output_predictions["pred"].shape)
-            print(zero_image.shape,
-                  int(cx - width / 2),
-                  int(cx + width / 2),
-                  int(cy - height / 2),
-                  int(cy + height / 2))
 
             zero_image[int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)] = output_predictions["pred"][int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)]
             contours, _ = cv2.findContours(zero_image.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

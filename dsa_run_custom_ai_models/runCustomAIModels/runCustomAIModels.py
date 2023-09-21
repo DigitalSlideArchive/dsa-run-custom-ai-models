@@ -239,8 +239,11 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         payload = {}
 
         # Include nuclei center in payload if specified
-        if args.nuclei_location:
-            payload["nuclei_location"] = args.nuclei_location
+        if args.nuclei_center:
+            nuclei_locations = []
+            for i in range(0,len(args.nuclei_center),2):
+                nuclei_locations.append([args.nuclei_center[i], args.nuclei_center[i+1]])
+            payload["nuclei_location"] = nuclei_locations         
 
         # Include image data in payload if specified.
         if args.send_image_tiles:
