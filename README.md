@@ -11,7 +11,7 @@
 
 There are two components for this module:
 
-1. **DSA Adapter**: Helps users to deploy and run the AI adapter with already present Digital slide archive
+1. **DSA Adapter**: Help users to deploy and run the AI adapter with Digital slide archive
 
 Following are the steps needed to download and deploy the AI adapter
 
@@ -21,12 +21,20 @@ git pull https://github.com/DigitalSlideArchive/dsa-run-custom-ai-models.git
 ```shell
 cd dsa-run-custom-ai-models
 ```
-
 ```shell
-docker build --force-rm -t dsarchive/run-custom-ai-models .
+docker build --force-rm -t dsarchive/runcustomaimodels .
 ```
+check if the docker image is present using the command
+```shell
+docker images
+```
+You should be able to locate the Docker image named `dsarchive/runcustomaimodels` in order to proceed. Once you've successfully confirmed its presence, proceed to add the AI adapter to the DSA platform by following the provided tutorial.
 
-Once the above step is finished add docker model to the DSA by providing the docker name 'dsarchive/run-custom-ai-models'
+![Add AI adapter](./docs/media/add-docker-to-dsa.gif)
+
+Once you receive a success message from the platform confirming that the Docker has been successfully added, you can validate this by navigating to the Digital Slide Archive platform and performing the following steps.
+
+![Varify AI adapter](./docs/media/show-histomicstk.gif)
 
 
 2. **AI API**: Deploys AI models seperately as a service. Users can add or remove AI models from this codebase.
@@ -42,6 +50,11 @@ docker build -t dsarchive/aimodels .
 
 ```shell
 docker run -t -d -p 8017:80 --name  aimodels dsarchive/aimodels 
+```
+
+You can varify the status of the docker image by doing.
+```shell
+docker images
 ```
 
 ## How it Works
