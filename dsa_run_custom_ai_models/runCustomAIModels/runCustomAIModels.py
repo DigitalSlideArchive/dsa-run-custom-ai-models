@@ -393,6 +393,27 @@ def main(args):
     #
     tile_fgnd_frac_list = [1.0]
 
+    # automatically deciding the tile size #TODO
+    if process_whole_image and args.nuclei_center:
+
+        for i in range(0,len(args.nuclei_center),2):
+            x_array = []
+            y_array = []
+            x_array.append(args.nuclei_center[i])
+            y_array.append(args.nuclei_center[i+1])
+        x_avg = np.average(x_array)
+        y_avg = np.average(y_array)
+        print('x,y average',x_avg,y_avg)
+
+        it_kwargs['region'] = {
+            'left': np.abs(x_avg - 150) if x_avg > 150 else 0,
+            'top': np.abs(y_avg - 150) if y_avg > 150 else 0,
+            'width': 300,
+            'height': 300,
+            'units': 'base_pixels'
+        }
+        ######################################################
+
     if not process_whole_image:
 
         it_kwargs['region'] = {
