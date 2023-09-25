@@ -127,5 +127,7 @@ Alternatively, you can run the AI models without Docker by creating a Conda envi
 Until today, we have successfully integrated three distinct AI models designed for the comprehensive analysis of histopathology images, encompassing both segmentation and classification tasks. Below, you will find detailed tutorials for utilizing each of these individual models.
 
 **[Nuclick nuclei segmentation](docs/tutorials/nuclickSegmentation.md)**
+&nbsp;
 **[Nuclick nuclei classification](./docs/tutorials/nuclickClassification.md)**
+&nbsp;
 **[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
