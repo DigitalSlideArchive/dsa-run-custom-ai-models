@@ -5,7 +5,7 @@ The AI model is built based on the research paper titled *["NuClick: A Deep Lear
 *Tutorial Created by [Subin Erattakulangara](www.subinek.com)*
 
 ## Overview
-Segments individual nuclei provided the user give input for the center of the nuclei. Users can provide the nuclei center as a list by either manually entering the locations in the format [[x1,y1],[x2,y2],[xn,yn]] or by adding the locations visually by using the polygon tool. One of the requirements while using the polygon tool is that there should be atleast 4 points and the polygon should be closed by double clicking at the last point.
+Segments individual nuclei provided the user give input for the center of the nuclei. Users can provide the nuclei center as a list by either manually entering the locations in the format [[x1,y1],[x2,y2],[xn,yn] or by adding the locations visually by using the polygon tool. One of the requirements while using the polygon tool is that there should be atleast 4 points and the polygon should be closed by double clicking at the last point.
 
 ### Using the Segment anything with DSA
 

@@ -122,14 +122,10 @@ Alternatively, you can run the AI models without Docker by creating a Conda envi
 
     This will start the FAST API interface for the AI applications.
 
-## How it Works
+## How to use pre-build AI models
 
-1. The provided Docker build command above constructs a Docker instance that includes both the user interface (UI) and backend necessary for integration with DSA.
+Until today, we have successfully integrated three distinct AI models designed for the comprehensive analysis of histopathology images, encompassing both segmentation and classification tasks. Below, you will find detailed tutorials for utilizing each of these individual models.
 
-2. Within the `ai-inference-model` folder, you'll find `run-ai-inferencing.py`, a FAST-API package designed to containerize your AI model.
-
-3. After connecting your custom AI model, you can deploy the Docker container by running `docker build run-custom-ai-model`.
-
-4. Once the Docker container is initialized, You can choose and run the ai model required.
-
-5. Press the "Submit" button to initiate the analysis.
+**[Nuclick nuclei segmentation](docs/tutorials/nuclickSegmentation.md)**
+**[Nuclick nuclei classification](./docs/tutorials/nuclickClassification.md)**
+**[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
