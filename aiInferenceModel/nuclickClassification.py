@@ -149,9 +149,12 @@ def run_ai_model_inferencing(json_data):
                 nucleiClass.append(out.item())
                 #add information to the annotation
                 element['lineColor'] = colormap[out.item()]
+                element['group'] = "Nuclick Classification"
+                element['label'] = {"value":classnames[out.item()]}
                 curated_annotation_data.append(element)
         else:
-            nucleiClass.append(4)
+            element['group'] = "Nuclick Classification"
             element['lineColor'] = colormap[4]
+            element['label'] = {"value":classnames[4]}
             curated_annotation_data.append(element)
     return curated_annotation_data
