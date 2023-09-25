@@ -190,7 +190,7 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     return im_nuclei_seg_mask
 
 
-def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
+def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
                             src_sigma_lab=None, default_img_inversion=False):
 
@@ -209,10 +209,6 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
     tile_nuclei_list = []
 
     tile_nuclei_class = []
-
-    # Type of output
-    classficationNetwork = False
-    segmentationNetwork = False
 
     for tile in ts.tileIterator(**it_kwargs):
 
@@ -270,7 +266,6 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
                 if "network_output" in output:
                     tile_nuclei_list.append(
                         response.json().get("network_output"))
-                    segmentationNetwork = True
             else:
                 # Handle request failure.
                 print(
@@ -284,42 +279,9 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             print(f"Error: {e}")
 
         # Flatten the list of nuclei annotations.
-        if segmentationNetwork:
-            nuclei_list = [
+        nuclei_list = [
                 anot for anot_list in tile_nuclei_list for anot in anot_list]
-        else:
-            tile_nuclei_list.append(cur_nuclei_list)
-            nuclei_list = [
-                anot for anot_list,
-                _ in tile_nuclei_list for anot in anot_list]
 
-        if classficationNetwork:
-            curated_nuclei_list = []
-            # Extract and assign colors to nuclei outlines based on classes.
-            class_list = [
-                clss for clss_list in tile_nuclei_class for clss in clss_list]
-
-            colormap = {
-                0: 'rgb(0,0,255)',
-                1: 'rgb(0,255,0)',
-                2: 'rgb(255,0,0)',
-                3: 'rgb(255,255,0)',
-                4: 'rgb(255,0,255)'}
-            classnames = {
-                0: "Other-Blue",
-                1: "Inflammatory-Green",
-                2: "Epithelial-Red",
-                3: "Spindle-Shaped-Yellow",
-                4: 'Cannot-be-processed-Pink'
-            }
-
-            for i in range(len(nuclei_list)):
-                colorClass = class_list[i]
-                nuclei_list[i]['lineColor'] = colormap[colorClass]
-                curated_nuclei_list.append(nuclei_list[i])
-            print(f'len of tile nuclei and classes: {len(class_list)}')
-        else:
-            curated_nuclei_list = nuclei_list
         if args.nuclei_center:
             break
 
@@ -329,7 +291,7 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
 
     print('Nuclei detection time = {}'.format(
         cli_utils.disp_time_hms(nuclei_detection_time)))
-    return curated_nuclei_list
+    return nuclei_list
 
 
 def main(args):
@@ -385,13 +347,11 @@ def main(args):
     # Read Input Image
     #
     ts, is_wsi = read_input_image(args, process_whole_image)
-
-    #
-    # Compute foreground fraction of tiles in parallel using Dask
-    #
     tile_fgnd_frac_list = [1.0]
-
+    
+    #
     # automatically deciding the tile size #TODO
+    #
     if process_whole_image and args.nuclei_center:
 
         for i in range(0,len(args.nuclei_center),2):
@@ -459,7 +419,7 @@ def main(args):
     #
     # Detect nuclei in parallel using Dask
     #
-    nuclei_list = detect_nuclei_with_dask(
+    nuclei_list = detect_nuclei_with_ai(
         ts,
         tile_fgnd_frac_list,
         it_kwargs,
