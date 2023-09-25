@@ -10,7 +10,7 @@ Segments individual nuclei provided the user give input for the center of the nu
 ### Using the Segment anything with DSA
 
 1. Navigate to the DSA module `runCustomAIModel`.
-   ![Navigate to DSA adapter](../media/show-histomicstk.gif)
+![Navigate to DSA adapter](../media/show-histomicstk.gif)
 &nbsp;
 
 2. Select **"Segment Anything"** from the dropdown menu for AI models.

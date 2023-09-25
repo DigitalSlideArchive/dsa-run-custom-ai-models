@@ -11,11 +11,11 @@ Efficiently segment all entities within the provided image, including nuclei and
 ### Using the Segment anything with DSA
 
 1. Navigate to the DSA module `runCustomAIModel`.
-   ![Navigate to DSA adapter](../media/show-histomicstk.gif)
+![Navigate to DSA adapter](../media/show-histomicstk.gif)
 &nbsp;
 
 2. Select **"Segment Anything"** from the dropdown menu for AI models.
 &nbsp;
 
 3. Determine the Region of Interest (ROI) and submit the request.
-   ![Select segment anything](../media/segment-anything.gif)
+![Select segment anything](../media/segment-anything.gif)
