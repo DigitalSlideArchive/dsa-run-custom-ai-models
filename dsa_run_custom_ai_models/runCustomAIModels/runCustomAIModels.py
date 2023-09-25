@@ -267,13 +267,9 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             if response.status_code == 200:
                 # Handle response data if successful.
                 output = response.json()
-                if "classes" in output:
-                    tile_nuclei_class.append(
-                        response.json().get("classes"))
-                    classficationNetwork = True
-                if "annotations" in output:
+                if "network_output" in output:
                     tile_nuclei_list.append(
-                        response.json().get("annotations"))
+                        response.json().get("network_output"))
                     segmentationNetwork = True
             else:
                 # Handle request failure.

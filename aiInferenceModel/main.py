@@ -22,7 +22,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
         network_output = nuclickClassification.run_ai_model_inferencing(
             json_data)
-        return {"classes": network_output}
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)
@@ -35,7 +35,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
         network_output = nuclickSegmentation.run_ai_model_inferencing(
             json_data)
-        return {"annotations": network_output}
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)
@@ -47,7 +47,7 @@ async def process_ima(request: Request):
     try:
         json_data = await request.json()
         network_output = samSegmentation.run_ai_model_inferencing(json_data)
-        return {"annotations": network_output}
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)

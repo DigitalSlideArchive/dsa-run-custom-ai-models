@@ -132,7 +132,7 @@ def run_ai_model_inferencing(json_data):
                     'closed': True,
                     'fillColor': 'rgba(0,0,0,0)',
                     'lineColor': 'rgb(0,255,0)',
-                    'group': 'x'
+                    'group': 'Nuclick segmentation',
                 }
 
                 nuclei_annot_list.append(cur_annot)
