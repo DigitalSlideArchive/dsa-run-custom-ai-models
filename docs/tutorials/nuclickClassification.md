@@ -20,6 +20,7 @@ boxes are provided as the output for the users to recognize the type of nuclei p
 ### Using the Nuclick classification with DSA
 
 1. Navigate to the DSA module `runCustomAIModel`.
+
 ![Navigate to DSA adapter](../media/show-histomicstk.gif)
 &nbsp;
 
@@ -27,4 +28,5 @@ boxes are provided as the output for the users to recognize the type of nuclei p
 &nbsp;
 
 3. Determine the Region of Interest (ROI) and submit the request.
+
 ![Select NuClick Classifier](../media/run-nuclick-segmentation.gif)
