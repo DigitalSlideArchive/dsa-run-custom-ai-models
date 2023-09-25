@@ -324,6 +324,8 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             print(f'len of tile nuclei and classes: {len(class_list)}')
         else:
             curated_nuclei_list = nuclei_list
+        if args.nuclei_center:
+            break
 
     nuclei_detection_time = time.time() - start_time
 
@@ -364,7 +366,7 @@ def main(args):
 
     # initial arguments
     it_kwargs = {
-        'tile_size': {'width': args.analysis_tile_size},
+        'tile_size': {'width': args.analysis_tile_size, 'height': args.analysis_tile_size},
         'scale': {'magnification': args.analysis_mag},
         'tile_overlap': {'x': tile_overlap, 'y': tile_overlap},
         'style': {args.style}
@@ -406,10 +408,10 @@ def main(args):
         print('x,y average',x_avg,y_avg)
 
         it_kwargs['region'] = {
-            'left': np.abs(x_avg - 150) if x_avg > 150 else 0,
-            'top': np.abs(y_avg - 150) if y_avg > 150 else 0,
-            'width': 300,
-            'height': 300,
+            'left': np.abs(x_avg - 250) if x_avg > 250 else 0,
+            'top': np.abs(y_avg - 250) if y_avg > 250 else 0,
+            'width': 500,
+            'height': 500,
             'units': 'base_pixels'
         }
         ######################################################

@@ -33,8 +33,8 @@ def run_ai_model_inferencing(json_data):
 
     #adding tile reference to the input cordinates
     for element in foreground_data:
-        element[0] = np.abs(element[0] - gx)
-        element[1] = np.abs(element[1] - gy)
+        element[0] = int(np.abs(element[0] - x))
+        element[1] = int(np.abs(element[1] - y))
     print('updated foreground ', foreground_data)
     ##############################################
 
