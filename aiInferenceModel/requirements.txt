@@ -11,3 +11,10 @@ temp
 opencv-python-headless
 matplotlib
 scikit-image
+
+#segment anything
+git+https://github.com/facebookresearch/segment-anything.git
+
+#mobile segment anything
+git+https://github.com/ChaoningZhang/MobileSAM.git
+timm

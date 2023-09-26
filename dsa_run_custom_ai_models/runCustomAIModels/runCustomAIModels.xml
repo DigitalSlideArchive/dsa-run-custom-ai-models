@@ -19,7 +19,9 @@
       <element>Nuclick Classification</element>
       <element>Nuclick Segmentation</element>
       <element>Segment Anything</element>
-      <default>Nuclick Classification</default>
+      <element>Segment Anything onlick</element>
+      <element>Mobile Segment Anything</element>
+      <default>Mobile Segment Anything</default>
     </string-enumeration>
     <string>
       <name>ai_model</name>

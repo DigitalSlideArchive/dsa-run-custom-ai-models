@@ -203,6 +203,10 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         network_location = 'http://172.19.0.1:8000/nuclick_segmentation/'
     if args.prebuild_ai_models == "Segment Anything":
         network_location = 'http://172.19.0.1:8000/segment_anything/'
+    if args.prebuild_ai_models == "Segment Anything onlick":
+        network_location = 'http://172.19.0.1:8000/segment_anything_onclick/'
+    if args.prebuild_ai_models == "Mobile Segment Anything":
+        network_location = 'http://172.19.0.1:8000/segment_anything_mobile/'
 
     start_time = time.time()
 
