@@ -31,7 +31,7 @@
       <longflag>ai_model</longflag>
       <default></default>
     </string>
-    <region shapes="polygon,multipolygon">
+    <region shapes="rectangle,polygon,polyline,point,multi,submitoff">
       <name>nuclei_center</name>
       <label>Nuclei Locations (optional)</label>
       <longflag>nuclei_center</longflag>
