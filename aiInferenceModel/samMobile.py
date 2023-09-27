@@ -11,7 +11,7 @@ MODEL_TYPE = "vit_t"  # The type of model to use, e.g., "vit_h"
 # Import necessary modules from the "segment_anything" package
 
 
-def run_ai_model_inferencing(json_data):
+def run_ai_model_inferencing(json_data, mobile_sam):
     """
     Run inference using a Semantic Segmentation model on input image data.
 
@@ -52,16 +52,7 @@ def run_ai_model_inferencing(json_data):
     cv2.imwrite(os.path.join(temp_dir, 'image.png'), image_np)
     image = cv2.imread(os.path.join(temp_dir, 'image.png'))
     print(f"image shape {image.shape}")
-
-    # Define the path to the pre-trained model checkpoint
-    CHECKPOINT_PATH = "../debug/weights/mobile_sam.pt"
-
-    # Initialize the Semantic Segmentation model and move it to the specified
-    # device
-    mobile_sam = sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH)
-    mobile_sam.to(device=DEVICE)
-    mobile_sam.eval()
-
+    
     # Generate masks for the input image using the model
     predictor = SamPredictor(mobile_sam)
     predictor.set_image(image)

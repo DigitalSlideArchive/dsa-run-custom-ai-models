@@ -13,15 +13,13 @@ from monai.transforms import (Activationsd, AsDiscreted, Compose,
 from skimage.measure import label, regionprops
 
 
-def run_ai_model_inferencing(json_data):
+def run_ai_model_inferencing(json_data, network):
     print(json_data.keys())
     image_data = json_data.get("image")
     foreground_data = json_data.get("nuclei_location")
     size_data = json_data.get("tilesize")
     gx,gy,_,_,x,y = size_data
     image = np.array(image_data)
-    model_weights_path = "./models/nuclickSegmentation.pt"
-    # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
     # infereing nuclei location #TODO
@@ -37,25 +35,6 @@ def run_ai_model_inferencing(json_data):
         element[1] = int(np.abs(element[1] - y))
     print('updated foreground ', foreground_data)
     ##############################################
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
-    network = BasicUNet(
-        spatial_dims=2,
-        in_channels=5,
-        out_channels=1,
-        features=(
-            32,
-            64,
-            128,
-            256,
-            512,
-            32))
-    checkpoint = torch.load(
-        model_weights_path,
-        map_location=torch.device(device))
-    model_state_dict = checkpoint.get("nuclickSegmentation", checkpoint)
-    network.load_state_dict(model_state_dict, strict=True)
 
     # Transforms
     pre_transforms = Compose([

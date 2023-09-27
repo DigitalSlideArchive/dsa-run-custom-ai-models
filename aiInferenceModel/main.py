@@ -5,6 +5,7 @@ import samSegmentation
 import samOnclick
 import samMobile
 from fastapi import FastAPI, HTTPException, Request
+from utils import pre_load_ai_models
 
 # You can import your custom AI models into this code
 # Example: import customSegmentationModel
@@ -12,6 +13,8 @@ from fastapi import FastAPI, HTTPException, Request
 
 app = FastAPI()
 
+#pre-load ai models for faster execution
+mobile_sam, nuclick_class, nuclick_seg = pre_load_ai_models()
 
 @app.get("/")
 def read_root():
@@ -23,7 +26,7 @@ async def process_ima(request: Request):
     try:
         json_data = await request.json()
         network_output = nuclickClassification.run_ai_model_inferencing(
-            json_data)
+            json_data, nuclick_class)
         return {"network_output": network_output}
 
     except Exception as e:
@@ -36,7 +39,7 @@ async def process_ima(request: Request):
     try:
         json_data = await request.json()
         network_output = nuclickSegmentation.run_ai_model_inferencing(
-            json_data)
+            json_data, nuclick_seg)
         return {"network_output": network_output}
 
     except Exception as e:
@@ -72,7 +75,7 @@ async def process_ima(request: Request):
 async def process_ima(request: Request):
     try:
         json_data = await request.json()
-        network_output = samMobile.run_ai_model_inferencing(json_data)
+        network_output = samMobile.run_ai_model_inferencing(json_data, mobile_sam)
         return {"network_output": network_output}
 
     except Exception as e:

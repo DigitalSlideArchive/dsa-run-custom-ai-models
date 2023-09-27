@@ -29,7 +29,7 @@ class BinarizeImage(Transform):
         return data
 
 
-def run_ai_model_inferencing(json_data):
+def run_ai_model_inferencing(json_data, network):
     print("Running Nuclei Classification AI Model")
     """
     Run inference using an AI model on input data provided in JSON format.
@@ -47,7 +47,7 @@ def run_ai_model_inferencing(json_data):
     image = np.array(image_data)
     mask = np.array(mask_data)
     mask = (mask > 0).astype(np.uint8)
-    model_weights_path = "./models/nuclick.pt"
+    #model_weights_path = "./models/nuclick.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -57,18 +57,6 @@ def run_ai_model_inferencing(json_data):
         "2": "Epithelial",
         "3": "Spindle-Shaped",
     }
-
-    device = torch.device("cpu")
-    network = DenseNet121(
-        spatial_dims=2,
-        in_channels=4,
-        out_channels=len(class_names))
-
-    checkpoint = torch.load(
-        model_weights_path,
-        map_location=torch.device(device))
-    model_state_dict = checkpoint.get("nuclick", checkpoint)
-    network.load_state_dict(model_state_dict, strict=True)
 
     img = image
     instances = mask
