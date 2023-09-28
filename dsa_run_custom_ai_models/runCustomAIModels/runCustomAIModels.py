@@ -318,10 +318,10 @@ def main(args):
         y_avg = np.average(y_array)
 
         it_kwargs['region'] = {
-            'left': np.abs(x_avg - 100) if x_avg > 100 else 0,
-            'top': np.abs(y_avg - 100) if y_avg > 100 else 0,
-            'width': 200,
-            'height': 200,
+            'left': np.abs(x_avg - 75) if x_avg > 75 else 0,
+            'top': np.abs(y_avg - 75) if y_avg > 75 else 0,
+            'width': 150,
+            'height': 150,
             'units': 'base_pixels'
         }
         ######################################################

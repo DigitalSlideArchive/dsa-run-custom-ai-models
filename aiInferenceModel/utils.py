@@ -6,11 +6,10 @@ import os
 import urllib.request
 DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 MODEL_TYPE = "vit_t"
-mobile_sam_weights = "../debug/weights/mobile_sam.pt"
-nuclick_class_weights = "../debug/weights/nuclick.pt"
-nuclick_seg_weights = "../debug/weights/nuclickSegmentation.pt"
+mobile_sam_weights = "./model_weights/mobile_sam.pt"
+nuclick_class_weights = "./model_weights/nuclick.pt"
+nuclick_seg_weights = "./model_weights/nuclickSegmentation.pt"
 ai_model_dir = "./model_weights"
-base_url='https://data.kitware.com/api/v1/file/hashsum/SHA-512/{hash}/download'
 
 device = torch.device(DEVICE)
 
@@ -47,7 +46,7 @@ def pre_load_ai_models():
     download_ai_models()
 
     # mobile sam model
-    mobile_sam = sam_model_registry[MODEL_TYPE](checkpoint=mobile_sam_weights)
+    mobile_sam = sam_model_registry[MODEL_TYPE](checkpoint=os.path.join(ai_model_dir,'mobile_sam.pt'))
     mobile_sam.to(device=device)
     mobile_sam.eval()
     
@@ -57,7 +56,7 @@ def pre_load_ai_models():
         in_channels=4,
         out_channels=4)
     checkpoint = torch.load(
-        nuclick_class_weights,
+        os.path.join(ai_model_dir, 'nuclick.pt'),
         map_location=torch.device(device))
     model_state_dict = checkpoint.get("nuclick", checkpoint)
     nuclick_class.load_state_dict(model_state_dict, strict=True)
@@ -75,7 +74,7 @@ def pre_load_ai_models():
             512,
             32))
     checkpoint = torch.load(
-        nuclick_seg_weights,
+        os.path.join(ai_model_dir, 'nuclickSegmentation.pt'),
         map_location=torch.device(device))
     model_state_dict = checkpoint.get("nuclickSegmentation", checkpoint)
     nuclick_seg.load_state_dict(model_state_dict, strict=True)
