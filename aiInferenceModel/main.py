@@ -76,6 +76,7 @@ async def process_ima(request: Request):
     try:
         json_data = await request.json()
         network_output = samMobile.run_ai_model_inferencing(json_data, mobile_sam)
+
         return {"network_output": network_output}
 
     except Exception as e:

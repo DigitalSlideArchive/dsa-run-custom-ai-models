@@ -12,6 +12,7 @@ MODEL_TYPE = "vit_t"  # The type of model to use, e.g., "vit_h"
 
 
 def run_ai_model_inferencing(json_data, mobile_sam):
+
     """
     Run inference using a Semantic Segmentation model on input image data.
 
@@ -52,7 +53,7 @@ def run_ai_model_inferencing(json_data, mobile_sam):
     cv2.imwrite(os.path.join(temp_dir, 'image.png'), image_np)
     image = cv2.imread(os.path.join(temp_dir, 'image.png'))
     print(f"image shape {image.shape}")
-    
+
     # Generate masks for the input image using the model
     predictor = SamPredictor(mobile_sam)
     predictor.set_image(image)
