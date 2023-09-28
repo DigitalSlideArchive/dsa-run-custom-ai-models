@@ -2,6 +2,8 @@
 import nuclickClassification
 import nuclickSegmentation
 import samSegmentation
+import samOnclick
+import samMobile
 from fastapi import FastAPI, HTTPException, Request
 
 # You can import your custom AI models into this code
@@ -22,7 +24,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
         network_output = nuclickClassification.run_ai_model_inferencing(
             json_data)
-        return {"classes": network_output}
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)
@@ -35,7 +37,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
         network_output = nuclickSegmentation.run_ai_model_inferencing(
             json_data)
-        return {"annotations": network_output}
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)
@@ -47,7 +49,31 @@ async def process_ima(request: Request):
     try:
         json_data = await request.json()
         network_output = samSegmentation.run_ai_model_inferencing(json_data)
-        return {"annotations": network_output}
+        return {"network_output": network_output}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
+    
+# Endpoint for Segment anything AI model with user input
+@app.post("/segment_anything_onclick/")
+async def process_ima(request: Request):
+    try:
+        json_data = await request.json()
+        network_output = samOnclick.run_ai_model_inferencing(json_data)
+        return {"network_output": network_output}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
+    
+# Endpoint for Mobile segment anything model    
+@app.post("/segment_anything_mobile/")
+async def process_ima(request: Request):
+    try:
+        json_data = await request.json()
+        network_output = samMobile.run_ai_model_inferencing(json_data)
+        return {"network_output": network_output}
 
     except Exception as e:
         print(e)

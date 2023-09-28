@@ -23,6 +23,8 @@ COPY --from=builder /opt/venv /opt/venv
 # Copy the application code
 COPY . .
 
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*
+
 # Make port 80 available to the world outside this container
 EXPOSE 80
 

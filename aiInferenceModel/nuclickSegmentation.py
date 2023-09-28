@@ -16,13 +16,27 @@ from skimage.measure import label, regionprops
 def run_ai_model_inferencing(json_data):
     print(json_data.keys())
     image_data = json_data.get("image")
-    foreground_data = eval(json_data.get("nuclei_location"))
+    foreground_data = json_data.get("nuclei_location")
     size_data = json_data.get("tilesize")
-    gx,gy,_,_,_,_ = size_data
+    gx,gy,_,_,x,y = size_data
     image = np.array(image_data)
     model_weights_path = "./models/nuclickSegmentation.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
+
+    # infereing nuclei location #TODO
+    print('Tile reference',size_data)
+    print("\n")
+    print('nuclei locations', foreground_data)
+    print("\n")
+    print("image size", image.shape)
+
+    #adding tile reference to the input cordinates
+    for element in foreground_data:
+        element[0] = int(np.abs(element[0] - x))
+        element[1] = int(np.abs(element[1] - y))
+    print('updated foreground ', foreground_data)
+    ##############################################
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
@@ -71,7 +85,6 @@ def run_ai_model_inferencing(json_data):
             'image.png'),
         "foreground": foreground_data}
 
-    print(type(foreground_data), foreground_data)
     data = pre_transforms(data)
 
     # prediction
@@ -101,20 +114,14 @@ def run_ai_model_inferencing(json_data):
                 nuclei_obj_props[i].bbox[1] + 1
             height = nuclei_obj_props[i].bbox[2] - \
                 nuclei_obj_props[i].bbox[0] + 1
-            print(cx, cy, width, height)
 
             # generate contours
             zero_image = np.zeros(output_predictions["pred"].shape)
-            print(zero_image.shape,
-                  int(cx - width / 2),
-                  int(cx + width / 2),
-                  int(cy - height / 2),
-                  int(cy + height / 2))
 
             zero_image[int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)] = output_predictions["pred"][int(cy-width/2):int(cy+width/2), int(cx-height/2):int(cx + height/2)]
             contours, _ = cv2.findContours(zero_image.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            output_list = [[[x[0][1], x[0][0], 0]
+            output_list = [[[x[0][1] + gx, x[0][0] + gy, 0]
                             for x in arr.tolist()] for arr in list(contours)]
 
             # create annotation json
@@ -125,7 +132,7 @@ def run_ai_model_inferencing(json_data):
                     'closed': True,
                     'fillColor': 'rgba(0,0,0,0)',
                     'lineColor': 'rgb(0,255,0)',
-                    'group': 'x'
+                    'group': 'Nuclick segmentation',
                 }
 
                 nuclei_annot_list.append(cur_annot)

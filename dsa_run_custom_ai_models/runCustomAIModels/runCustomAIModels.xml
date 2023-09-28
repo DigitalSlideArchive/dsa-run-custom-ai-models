@@ -19,7 +19,9 @@
       <element>Nuclick Classification</element>
       <element>Nuclick Segmentation</element>
       <element>Segment Anything</element>
-      <default>Nuclick Classification</default>
+      <element>Segment Anything onlick</element>
+      <element>Mobile Segment Anything</element>
+      <default>Mobile Segment Anything</default>
     </string-enumeration>
     <string>
       <name>ai_model</name>
@@ -29,13 +31,13 @@
       <longflag>ai_model</longflag>
       <default></default>
     </string>
-    <string>
-      <name>nuclei_location</name>
+    <region shapes="point,multi,submitoff">
+      <name>nuclei_center</name>
       <label>Nuclei Locations (optional)</label>
-      <description>Provide nuclei location for segmentation. Example:[[x1,y1],[x2,y2]]. Used for Nuclick nuclei segmentation.  </description>
-      <longflag>nuclei_location</longflag>
-      <default>[[130,29],[130,30]]</default>
-    </string>
+      <longflag>nuclei_center</longflag>
+      <description>Nuclei center where the analysis has to be performed</description>
+      <default></default>
+    </region>
     <boolean>
       <name>send_image_tiles</name>
       <label>Image tiles</label>

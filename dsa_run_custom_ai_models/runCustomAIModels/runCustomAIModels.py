@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import pprint
 import time
 from pathlib import Path
 
@@ -22,13 +21,11 @@ logging.basicConfig(level=logging.CRITICAL)
 
 def read_input_image(args, process_whole_image=False):
     # read input image and check if it is WSI
-    print('\n>> Reading input image ... \n')
+    ##print('\n>> Reading input image ... \n')
 
     ts = large_image.getTileSource(args.inputImageFile, style=args.style)
 
     ts_metadata = ts.getMetadata()
-
-    print(json.dumps(ts_metadata, indent=2))
 
     is_wsi = ts_metadata['magnification'] is not None
 
@@ -64,34 +61,20 @@ def validate_args(args):
 
 def process_wsi_as_whole_image(
         ts, invert_image=False, args=None, default_img_inversion=False):
-    print('\n>> Computing tissue/foreground mask at low-res ...\n')
 
-    start_time = time.time()
     # segment wsi foreground at low resolution
     im_fgnd_mask_lres, fgnd_seg_scale = \
         cli_utils.segment_wsi_foreground_at_low_res(
             ts, invert_image=invert_image, frame=args.frame,
             default_img_inversion=default_img_inversion)
-
-    fgnd_time = time.time() - start_time
-
-    print('low-res foreground mask computation time = {}'.format(
-        cli_utils.disp_time_hms(fgnd_time)))
-
     return im_fgnd_mask_lres, fgnd_seg_scale
 
 
 def process_wsi(ts, it_kwargs, args, im_fgnd_mask_lres=None,
                 fgnd_seg_scale=None, process_whole_image=False):
 
-    # process the wsi
-    print('\n>> Computing foreground fraction of all tiles ...\n')
-
-    start_time = time.time()
 
     num_tiles = ts.getSingleTile(**it_kwargs)['iterator_range']['position']
-
-    print(f'Number of tiles = {num_tiles}')
 
     if process_whole_image:
 
@@ -109,36 +92,18 @@ def process_wsi(ts, it_kwargs, args, im_fgnd_mask_lres=None,
 
     if not num_fgnd_tiles:
         tile_fgnd_frac_list = np.full(num_tiles, 1.0)
-        percent_fgnd_tiles = 100
         num_fgnd_tiles = np.count_nonzero(tile_fgnd_frac_list)
-    else:
-        percent_fgnd_tiles = 100.0 * num_fgnd_tiles / num_tiles
-
-    fgnd_frac_comp_time = time.time() - start_time
-
-    print('Number of foreground tiles = {:d} ({:2f}%%)'.format(
-        num_fgnd_tiles, percent_fgnd_tiles))
-
-    print('Tile foreground fraction computation time = {}'.format(
-        cli_utils.disp_time_hms(fgnd_frac_comp_time)))
 
     return tile_fgnd_frac_list
 
 
 def compute_reinhard_norm(args, invert_image=False,
                           default_img_inversion=False):
-    print('\n>> Computing reinhard color normalization stats ...\n')
 
-    start_time = time.time()
     src_mu_lab, src_sigma_lab = htk_cnorm.reinhard_stats(
         args.inputImageFile, 0.01, magnification=args.analysis_mag,
         invert_image=invert_image, style=args.style, frame=args.frame,
         default_img_inversion=default_img_inversion)
-
-    rstats_time = time.time() - start_time
-
-    print('Reinhard stats computation time = {}'.format(
-        cli_utils.disp_time_hms(rstats_time)))
     return src_mu_lab, src_sigma_lab
 
 
@@ -190,29 +155,26 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     return im_nuclei_seg_mask
 
 
-def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
+def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
                             src_sigma_lab=None, default_img_inversion=False):
 
-    print('\n>> Detecting nuclei ...\n')
-
     # Selecting the ai model
     if args.prebuild_ai_models == "Nuclick Classification":
-        network_location = 'http://172.19.0.1:8000/nuclick_classification/'
+        network_location = 'http://172.18.0.1:8000/nuclick_classification/'
     if args.prebuild_ai_models == "Nuclick Segmentation":
-        network_location = 'http://172.19.0.1:8000/nuclick_segmentation/'
+        network_location = 'http://172.18.0.1:8000/nuclick_segmentation/'
     if args.prebuild_ai_models == "Segment Anything":
-        network_location = 'http://172.19.0.1:8000/segment_anything/'
+        network_location = 'http://172.18.0.1:8000/segment_anything/'
+    if args.prebuild_ai_models == "Segment Anything onlick":
+        network_location = 'http://172.18.0.1:8000/segment_anything_onclick/'
+    if args.prebuild_ai_models == "Mobile Segment Anything":
+        network_location = 'http://172.18.0.1:8000/segment_anything_mobile/'
 
-    start_time = time.time()
 
     tile_nuclei_list = []
 
     tile_nuclei_class = []
-
-    # Type of output
-    classficationNetwork = False
-    segmentationNetwork = False
 
     for tile in ts.tileIterator(**it_kwargs):
 
@@ -239,8 +201,11 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
         payload = {}
 
         # Include nuclei center in payload if specified
-        if args.nuclei_location:
-            payload["nuclei_location"] = args.nuclei_location
+        if args.nuclei_center:
+            nuclei_locations = []
+            for i in range(0,len(args.nuclei_center),2):
+                nuclei_locations.append([args.nuclei_center[i], args.nuclei_center[i+1]])
+            payload["nuclei_location"] = nuclei_locations         
 
         # Include image data in payload if specified.
         if args.send_image_tiles:
@@ -264,14 +229,9 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             if response.status_code == 200:
                 # Handle response data if successful.
                 output = response.json()
-                if "classes" in output:
-                    tile_nuclei_class.append(
-                        response.json().get("classes"))
-                    classficationNetwork = True
-                if "annotations" in output:
+                if "network_output" in output:
                     tile_nuclei_list.append(
-                        response.json().get("annotations"))
-                    segmentationNetwork = True
+                        response.json().get("network_output"))
             else:
                 # Handle request failure.
                 print(
@@ -285,50 +245,12 @@ def detect_nuclei_with_dask(ts, tile_fgnd_frac_list, it_kwargs, args,
             print(f"Error: {e}")
 
         # Flatten the list of nuclei annotations.
-        if segmentationNetwork:
-            nuclei_list = [
+        nuclei_list = [
                 anot for anot_list in tile_nuclei_list for anot in anot_list]
-        else:
-            tile_nuclei_list.append(cur_nuclei_list)
-            nuclei_list = [
-                anot for anot_list,
-                _ in tile_nuclei_list for anot in anot_list]
 
-        if classficationNetwork:
-            curated_nuclei_list = []
-            # Extract and assign colors to nuclei outlines based on classes.
-            class_list = [
-                clss for clss_list in tile_nuclei_class for clss in clss_list]
-
-            colormap = {
-                0: 'rgb(0,0,255)',
-                1: 'rgb(0,255,0)',
-                2: 'rgb(255,0,0)',
-                3: 'rgb(255,255,0)',
-                4: 'rgb(255,0,255)'}
-            classnames = {
-                0: "Other-Blue",
-                1: "Inflammatory-Green",
-                2: "Epithelial-Red",
-                3: "Spindle-Shaped-Yellow",
-                4: 'Cannot-be-processed-Pink'
-            }
-
-            for i in range(len(nuclei_list)):
-                colorClass = class_list[i]
-                nuclei_list[i]['lineColor'] = colormap[colorClass]
-                curated_nuclei_list.append(nuclei_list[i])
-            print(f'len of tile nuclei and classes: {len(class_list)}')
-        else:
-            curated_nuclei_list = nuclei_list
-
-    nuclei_detection_time = time.time() - start_time
-
-    print(f'Number of nuclei = {len(nuclei_list)}')
-
-    print('Nuclei detection time = {}'.format(
-        cli_utils.disp_time_hms(nuclei_detection_time)))
-    return curated_nuclei_list
+        if args.nuclei_center:
+            break
+    return nuclei_list
 
 
 def main(args):
@@ -337,11 +259,6 @@ def main(args):
     invert_image = False
     default_img_inversion = False
     process_whole_image = False
-
-    total_start_time = time.time()
-
-    print('\n>> CLI Parameters ...\n')
-    pprint.pprint(vars(args))
 
     validate_args(args)
 
@@ -361,7 +278,7 @@ def main(args):
 
     # initial arguments
     it_kwargs = {
-        'tile_size': {'width': args.analysis_tile_size},
+        'tile_size': {'width': args.analysis_tile_size, 'height': args.analysis_tile_size},
         'scale': {'magnification': args.analysis_mag},
         'tile_overlap': {'x': tile_overlap, 'y': tile_overlap},
         'style': {args.style}
@@ -384,11 +301,29 @@ def main(args):
     # Read Input Image
     #
     ts, is_wsi = read_input_image(args, process_whole_image)
-
-    #
-    # Compute foreground fraction of tiles in parallel using Dask
-    #
     tile_fgnd_frac_list = [1.0]
+    
+    #
+    # automatically deciding the tile size #TODO
+    #
+    if process_whole_image and args.nuclei_center:
+
+        for i in range(0,len(args.nuclei_center),2):
+            x_array = []
+            y_array = []
+            x_array.append(args.nuclei_center[i])
+            y_array.append(args.nuclei_center[i+1])
+        x_avg = np.average(x_array)
+        y_avg = np.average(y_array)
+
+        it_kwargs['region'] = {
+            'left': np.abs(x_avg - 100) if x_avg > 100 else 0,
+            'top': np.abs(y_avg - 100) if y_avg > 100 else 0,
+            'width': 200,
+            'height': 200,
+            'units': 'base_pixels'
+        }
+        ######################################################
 
     if not process_whole_image:
 
@@ -437,7 +372,7 @@ def main(args):
     #
     # Detect nuclei in parallel using Dask
     #
-    nuclei_list = detect_nuclei_with_dask(
+    nuclei_list = detect_nuclei_with_ai(
         ts,
         tile_fgnd_frac_list,
         it_kwargs,
@@ -452,24 +387,13 @@ def main(args):
     # Remove overlapping nuclei
     #
     if args.remove_overlapping_nuclei_segmentation:
-        print('\n>> Removing overlapping nuclei segmentations ...\n')
-        nuclei_removal_start_time = time.time()
 
         nuclei_list = htk_seg_label.remove_overlap_nuclei(
             nuclei_list, args.nuclei_annotation_format)
-        nuclei_removal_setup_time = time.time() - nuclei_removal_start_time
-
-        print(
-            'Number of nuclei after overlap removal {}'.format(
-                len(nuclei_list)))
-        print('Nuclei removal processing time = {}'.format(
-            cli_utils.disp_time_hms(nuclei_removal_setup_time)))
 
     #
     # Write annotation file
     #
-    print('\n>> Writing annotation file ...\n')
-
     annot_fname = os.path.splitext(
         os.path.basename(args.outputNucleiAnnotationFile))[0]
 
@@ -493,11 +417,6 @@ def main(args):
                 ',',
                 ':'),
             sort_keys=False)
-
-    total_time_taken = time.time() - total_start_time
-
-    print('Total analysis time = {}'.format(
-        cli_utils.disp_time_hms(total_time_taken)))
 
 
 if __name__ == '__main__':
