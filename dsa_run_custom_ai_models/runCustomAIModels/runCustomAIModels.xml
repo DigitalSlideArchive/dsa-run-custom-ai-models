@@ -31,12 +31,12 @@
       <longflag>ai_model</longflag>
       <default></default>
     </string>
-    <region shapes="rectangle,polygon,polyline,point,multi,submitoff">
+    <region shapes="point,multi,submitoff">
       <name>nuclei_center</name>
       <label>Nuclei Locations (optional)</label>
       <longflag>nuclei_center</longflag>
       <description>Nuclei center where the analysis has to be performed</description>
-      <default>-1,-1,-1,-1</default>
+      <default></default>
     </region>
     <boolean>
       <name>send_image_tiles</name>
