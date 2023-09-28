@@ -2,7 +2,7 @@ from mobile_sam import sam_model_registry
 from monai.networks.nets import DenseNet121
 from monai.networks.nets import BasicUNet
 import torch
-DEVICE = "cuda:0"
+DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 MODEL_TYPE = "vit_t"
 mobile_sam_weights = "../debug/weights/mobile_sam.pt"
 nuclick_class_weights = "../debug/weights/nuclick.pt"
