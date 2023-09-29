@@ -1,9 +1,5 @@
 # Import AI model modules
-import nuclickClassification
-import nuclickSegmentation
-import samSegmentation
-import samOnclick
-import samMobile
+from ai_models import nuclickClassification,nuclickSegmentation, samMobile, samOnclick, samSegmentation
 from fastapi import FastAPI, HTTPException, Request
 from utils import pre_load_ai_models
 

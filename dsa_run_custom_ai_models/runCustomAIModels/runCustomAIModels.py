@@ -307,7 +307,8 @@ def main(args):
     #
     # automatically deciding the tile size #TODO
     #
-    if process_whole_image and args.nuclei_center:
+    if process_whole_image and not np.all(np.array(args.nuclei_center) == -1):
+        print('it_kwargs being triggered', np.all(np.array(args.nuclei_center) == -1))
 
         for i in range(0,len(args.nuclei_center),2):
             x_array = []

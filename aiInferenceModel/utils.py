@@ -4,14 +4,8 @@ from monai.networks.nets import BasicUNet
 import torch
 import os
 import urllib.request
-DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-MODEL_TYPE = "vit_t"
-mobile_sam_weights = "./model_weights/mobile_sam.pt"
-nuclick_class_weights = "./model_weights/nuclick.pt"
-nuclick_seg_weights = "./model_weights/nuclickSegmentation.pt"
-ai_model_dir = "./model_weights"
 
-device = torch.device(DEVICE)
+ai_model_dir = "./model_weights"
 
 def download_ai_models():
     urls = {'mobile_sam.pt':'https://data.kitware.com/api/v1/file/hashsum/sha512/d2dcb4448e6f5443383dcd92dd00f0bfeeddad8d2ddabc3481297f67a8ca4095517a8225545c6c2461d9a00722f9277cf2ce420ba4f389f2e77a253cecf8f55f/download',
@@ -41,11 +35,14 @@ def download_ai_models():
 
 # Pre-load small ai models for faster execution
 def pre_load_ai_models():
-
+    DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    device = torch.device(DEVICE)
+    
     #download all ai models
     download_ai_models()
 
     # mobile sam model
+    MODEL_TYPE = "vit_t"
     mobile_sam = sam_model_registry[MODEL_TYPE](checkpoint=os.path.join(ai_model_dir,'mobile_sam.pt'))
     mobile_sam.to(device=device)
     mobile_sam.eval()

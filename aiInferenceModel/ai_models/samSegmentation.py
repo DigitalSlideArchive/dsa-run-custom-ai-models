@@ -45,7 +45,7 @@ def run_ai_model_inferencing(json_data):
     cv2.imwrite(os.path.join(temp_dir, 'image.png'), image_np)
 
     # Define the path to the pre-trained model checkpoint
-    CHECKPOINT_PATH = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/weights/sam_vit_h_4b8939.pth"
+    CHECKPOINT_PATH = "./model_weights/segmentAnything.pth"
 
     # Initialize the Semantic Segmentation model and move it to the specified
     # device
