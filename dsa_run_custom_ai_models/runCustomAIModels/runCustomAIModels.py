@@ -323,12 +323,13 @@ def main(args):
             y_array.append(args.nuclei_center[i+1])
         x_avg = np.average(x_array)
         y_avg = np.average(y_array)
+        print(f"this is the nuclei area: {args.min_nucleus_area}")
 
         it_kwargs['region'] = {
-            'left': np.abs(x_avg - 75) if x_avg > 75 else 0,
-            'top': np.abs(y_avg - 75) if y_avg > 75 else 0,
-            'width': 150,
-            'height': 150,
+            'left': np.abs(x_avg - args.min_nucleus_area) if x_avg > args.min_nucleus_area else 0,
+            'top': np.abs(y_avg - args.min_nucleus_area) if y_avg > args.min_nucleus_area else 0,
+            'width': args.min_nucleus_area * 2,
+            'height': args.min_nucleus_area * 2,
             'units': 'base_pixels'
         }
         ######################################################

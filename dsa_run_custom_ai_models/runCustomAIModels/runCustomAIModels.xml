@@ -219,7 +219,7 @@
       <label>Minimum Nucleus Area</label>
       <description>Minimum area that each nucleus should have</description>
       <longflag>min_nucleus_area</longflag>
-      <default>80</default>
+      <default>75</default>
     </integer>
       <integer>
       <name>tile_overlap_value</name>
