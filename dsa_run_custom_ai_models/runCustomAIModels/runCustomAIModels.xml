@@ -31,12 +31,28 @@
       <longflag>ai_model</longflag>
       <default></default>
     </string>
+    <string-enumeration>
+      <name>type_ai_models</name>
+      <label>Select the type of AI model</label>
+      <description>Select if the model is "Segmentation" or "Classification"</description>
+      <longflag>type_ai_models</longflag>
+      <element>Segmentation</element>
+      <element>Classification</element>
+      <default>Segmentation</default>
+    </string-enumeration>
     <region shapes="point,multi,submitoff">
       <name>nuclei_center</name>
-      <label>Nuclei Locations (optional)</label>
+      <label>Nuclei Locations</label>
       <longflag>nuclei_center</longflag>
-      <description>Nuclei center where the analysis has to be performed</description>
-      <default></default>
+      <description>Nuclei center where the analysis has to be performed (Used for Segmentation models)</description>
+      <default>-1,-1,-1,-1</default>
+    </region>
+        <region>
+      <name>analysis_roi</name>
+      <label>Analysis ROI</label>
+      <description>Region of interest within which the analysis should be done(used for Classification models). Default value of "-1, -1, -1, -1" indicates that the whole image should be processed.</description>
+      <longflag>analysis_roi</longflag>
+      <default>-1,-1,-1,-1</default>
     </region>
     <boolean>
       <name>send_image_tiles</name>
@@ -70,13 +86,6 @@
       <channel>input</channel>
       <index>0</index>
     </image>
-    <region>
-      <name>analysis_roi</name>
-      <label>Analysis ROI</label>
-      <description>Region of interest within which the analysis should be done. Must be a four element vector in the format "left, top, width, height" in the space of the base layer. Default value of "-1, -1, -1, -1" indicates that the whole image should be processed.</description>
-      <longflag>analysis_roi</longflag>
-      <default>-1,-1,-1,-1</default>
-    </region>
     <string-enumeration>
       <name>nuclei_annotation_format</name>
       <label>Nuclei annotation format</label>
@@ -210,7 +219,7 @@
       <label>Minimum Nucleus Area</label>
       <description>Minimum area that each nucleus should have</description>
       <longflag>min_nucleus_area</longflag>
-      <default>80</default>
+      <default>75</default>
     </integer>
       <integer>
       <name>tile_overlap_value</name>
