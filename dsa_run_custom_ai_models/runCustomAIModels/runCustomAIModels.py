@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import time
 from pathlib import Path
 
 import histomicstk
@@ -19,9 +18,8 @@ from histomicstk.cli.utils import CLIArgumentParser
 logging.basicConfig(level=logging.CRITICAL)
 
 
-def read_input_image(args, process_whole_image=False):
-    # read input image and check if it is WSI
-    ##print('\n>> Reading input image ... \n')
+def read_input_image(args):
+    # Read input image and check if it is WSI
 
     ts = large_image.getTileSource(args.inputImageFile, style=args.style)
 
@@ -33,7 +31,7 @@ def read_input_image(args, process_whole_image=False):
 
 
 def image_inversion_flag_setter(args=None):
-    # generates image inversion flags
+    # Generates image inversion flags
     invert_image, default_img_inversion = False, False
     if args.ImageInversionForm == "Yes":
         invert_image = True
@@ -45,7 +43,7 @@ def image_inversion_flag_setter(args=None):
 
 
 def validate_args(args):
-    # validates the input arguments
+    # Validates the input arguments
     if not os.path.isfile(args.inputImageFile):
         raise OSError('Input image file does not exist.')
 
@@ -62,7 +60,7 @@ def validate_args(args):
 def process_wsi_as_whole_image(
         ts, invert_image=False, args=None, default_img_inversion=False):
 
-    # segment wsi foreground at low resolution
+    # Segment wsi foreground at low resolution
     im_fgnd_mask_lres, fgnd_seg_scale = \
         cli_utils.segment_wsi_foreground_at_low_res(
             ts, invert_image=invert_image, frame=args.frame,
@@ -112,7 +110,7 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     single_channel = False
     invert_image = False
 
-    # get tile image & check number of channels
+    # Get tile image & check number of channels
     single_channel = len(
         im_tile['tile'].shape) <= 2 or im_tile['tile'].shape[2] == 1
     if single_channel:
@@ -123,7 +121,7 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     else:
         im_tile = im_tile['tile'][:, :, :3]
 
-    # perform image inversion
+    # Perform image inversion
     if invert_image:
         im_tile = np.max(im_tile) - im_tile
 
@@ -133,17 +131,17 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
                                  src_mu=src_mu_lab,
                                  src_sigma=src_sigma_lab)
 
-    # perform color decovolution
+    # Perform color decovolution
     w = cli_utils.get_stain_matrix(args)
 
-    # perform deconvolution
+    # Perform deconvolution
     im_stains = htk_cdeconv.color_deconvolution(im_nmzd, w).Stains
     im_nuclei_stain = im_stains[:, :, 0].astype(float)
 
-    # segment nuclear foreground
+    # Segment nuclear foreground
     im_nuclei_fgnd_mask = im_nuclei_stain < args.foreground_threshold
 
-    # segment nuclei
+    # Segment nuclei
     im_nuclei_seg_mask = htk_nuclear.detect_nuclei_kofahi(
         im_nuclei_stain,
         im_nuclei_fgnd_mask,
@@ -280,11 +278,11 @@ def main(args):
     if tile_overlap == -1:
         tile_overlap = (args.max_radius + 1) * 4
 
-    # retrive style
+    # Retrive style
     if not args.style or args.style.startswith('{#control'):
         args.style = None
 
-    # initial arguments
+    # Initial arguments
     it_kwargs = {
         'tile_size': {'width': args.analysis_tile_size, 'height': args.analysis_tile_size},
         'scale': {'magnification': args.analysis_mag},
@@ -292,7 +290,7 @@ def main(args):
         'style': {args.style}
     }
 
-    # retrive frame
+    # Retrive frame
     if not args.frame or args.frame.startswith('{#control'):
         args.frame = None
     elif not args.frame.isdigit():
@@ -301,18 +299,18 @@ def main(args):
         it_kwargs['frame'] = args.frame
 
     #
-    # color inversion flag
+    # Color inversion flag
     #
     invert_image, default_img_inversion = image_inversion_flag_setter(args)
 
     #
     # Read Input Image
     #
-    ts, is_wsi = read_input_image(args, process_whole_image)
+    ts, is_wsi = read_input_image(args)
     tile_fgnd_frac_list = [1.0]
     
     #
-    # automatically deciding the tile size #TODO
+    # Automatically deciding the tile size
     #
     if process_whole_image and not nuclei_center_coordinates:
 
@@ -367,11 +365,11 @@ def main(args):
     src_sigma_lab = None
 
     if is_wsi and process_whole_image:
-        # get a tile
+        # Get a tile
         tile_info = ts.getSingleTile(
             format=large_image.tilesource.TILE_FORMAT_NUMPY,
             frame=args.frame)
-        # get tile image & check number of channels
+        # Get tile image & check number of channels
         single_channel = len(
             tile_info['tile'].shape) <= 2 or tile_info['tile'].shape[2] == 1
         if not single_channel:
