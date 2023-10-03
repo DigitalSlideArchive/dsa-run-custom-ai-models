@@ -158,10 +158,13 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
 def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
                             src_sigma_lab=None, default_img_inversion=False):
+    # define the type of process
+    classification = False
 
     # Selecting the ai model
     if args.prebuild_ai_models == "Nuclick Classification":
         network_location = 'http://172.18.0.1:8000/nuclick_classification/'
+        classification = True
     if args.prebuild_ai_models == "Nuclick Segmentation":
         network_location = 'http://172.18.0.1:8000/nuclick_segmentation/'
     if args.prebuild_ai_models == "Segment Anything":
@@ -249,7 +252,7 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_list = [
                 anot for anot_list in tile_nuclei_list for anot in anot_list]
 
-        if args.nuclei_center:
+        if np.all(np.array(args.nuclei_center) == -1) and not classification:
             break
     return nuclei_list
 
