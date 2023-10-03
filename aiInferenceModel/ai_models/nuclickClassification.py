@@ -47,7 +47,6 @@ def run_ai_model_inferencing(json_data, network):
     image = np.array(image_data)
     mask = np.array(mask_data)
     mask = (mask > 0).astype(np.uint8)
-    #model_weights_path = "./models/nuclick.pt"
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
 
@@ -64,18 +63,18 @@ def run_ai_model_inferencing(json_data, network):
     _, _, _, _, xc, yc = size_data[0], size_data[1], size_data[2], size_data[3], size_data[4], size_data[5]
 
     colormap = {
-                0: 'rgb(0,0,255)',
-                1: 'rgb(0,255,0)',
-                2: 'rgb(255,0,0)',
-                3: 'rgb(255,255,0)',
-                4: 'rgb(255,0,255)'}
+        0: 'rgb(0,0,255)',
+        1: 'rgb(0,255,0)',
+        2: 'rgb(255,0,0)',
+        3: 'rgb(255,255,0)',
+        4: 'rgb(255,0,255)'}
     classnames = {
-                0: "Other-Blue",
-                1: "Inflammatory-Green",
-                2: "Epithelial-Red",
-                3: "Spindle-Shaped-Yellow",
-                4: 'Cannot-be-processed-Pink'
-            }
+        0: "Other-Blue",
+        1: "Inflammatory-Green",
+        2: "Epithelial-Red",
+        3: "Spindle-Shaped-Yellow",
+        4: 'Cannot-be-processed-Pink'
+    }
     patch_size = 64
     curated_annotation_data = []
     for element in annot_data[0]:
@@ -135,14 +134,14 @@ def run_ai_model_inferencing(json_data, network):
                 out = F.softmax(pred, dim=0)
                 out = torch.argmax(out, dim=0)
                 nucleiClass.append(out.item())
-                #add information to the annotation
+                # add information to the annotation
                 element['lineColor'] = colormap[out.item()]
                 element['group'] = "Nuclick Classification"
-                element['label'] = {"value":classnames[out.item()]}
+                element['label'] = {"value": classnames[out.item()]}
                 curated_annotation_data.append(element)
         else:
             element['group'] = "Nuclick Classification"
             element['lineColor'] = colormap[4]
-            element['label'] = {"value":classnames[4]}
+            element['label'] = {"value": classnames[4]}
             curated_annotation_data.append(element)
     return curated_annotation_data

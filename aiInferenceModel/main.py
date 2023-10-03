@@ -1,5 +1,6 @@
 # Import AI model modules
-from ai_models import nuclickClassification,nuclickSegmentation, samMobile, samOnclick, samSegmentation
+from ai_models import (nuclickClassification, nuclickSegmentation, samMobile,
+                       samOnclick, samSegmentation)
 from fastapi import FastAPI, HTTPException, Request
 from utils import pre_load_ai_models
 
@@ -15,11 +16,14 @@ mobile_sam, nuclick_class, nuclick_seg = pre_load_ai_models()
 # Request count
 request_count = 0
 
+
 @app.get("/")
 def read_root():
     return {"message": "DSA AI adapter for deploying AI models"}
 
 # Endpoint for Nuclick AI model classification
+
+
 @app.post("/nuclick_classification/")
 async def process_ima(request: Request):
     global request_count
@@ -36,6 +40,8 @@ async def process_ima(request: Request):
         raise HTTPException(status_code=400, detail="Invalid data")
 
 # Endpoint for Nuclick AI model segmentation
+
+
 @app.post("/nuclick_segmentation/")
 async def process_ima(request: Request):
     global request_count
@@ -52,6 +58,8 @@ async def process_ima(request: Request):
         raise HTTPException(status_code=400, detail="Invalid data")
 
 # Endpoint for Segment anything AI model segmentation
+
+
 @app.post("/segment_anything/")
 async def process_ima(request: Request):
     global request_count
@@ -65,8 +73,10 @@ async def process_ima(request: Request):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
-    
+
 # Endpoint for Segment anything AI model with user input
+
+
 @app.post("/segment_anything_onclick/")
 async def process_ima(request: Request):
     global request_count
@@ -80,8 +90,10 @@ async def process_ima(request: Request):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
-    
-# Endpoint for Mobile segment anything model    
+
+# Endpoint for Mobile segment anything model
+
+
 @app.post("/segment_anything_mobile/")
 async def process_ima(request: Request):
     global request_count
@@ -89,7 +101,8 @@ async def process_ima(request: Request):
     request_count += 1
     try:
         json_data = await request.json()
-        network_output = samMobile.run_ai_model_inferencing(json_data, mobile_sam)
+        network_output = samMobile.run_ai_model_inferencing(
+            json_data, mobile_sam)
 
         return {"network_output": network_output}
 

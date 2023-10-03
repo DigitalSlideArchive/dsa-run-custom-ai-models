@@ -1,9 +1,9 @@
-from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 import os
 import tempfile
 
 import cv2
 import numpy as np
+from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 
 DEVICE = "cpu"  # Can be changed to a specific hardware device, e.g., "cuda:0" for GPU
 MODEL_TYPE = "vit_h"  # The type of model to use, e.g., "vit_h"
@@ -29,7 +29,7 @@ def run_ai_model_inferencing(json_data):
     """
     This code uses Facebook segment anything model.
 
-    authors : Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland, 
+    authors : Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland,
     Chloe and Gustafson, Laura and Xiao, Tete and Whitehead, Spencer and Berg, Alexander C. and Lo,
       Wan-Yen and Doll, Piotr and Girshick, Ross
     """

@@ -1,9 +1,9 @@
-from segment_anything import SamPredictor, sam_model_registry
 import os
 import tempfile
 
 import cv2
 import numpy as np
+from segment_anything import SamPredictor, sam_model_registry
 
 DEVICE = "cpu"  # Can be changed to a specific hardware device, e.g., "cuda:0" for GPU
 MODEL_TYPE = "vit_h"  # The type of model to use, e.g., "vit_h"
@@ -29,7 +29,7 @@ def run_ai_model_inferencing(json_data):
     """
     This code uses Facebook segment anything model.
 
-    authors : Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland, 
+    authors : Kirillov, Alexander and Mintun, Eric and Ravi, Nikhila and Mao, Hanzi and Rolland,
     Chloe and Gustafson, Laura and Xiao, Tete and Whitehead, Spencer and Berg, Alexander C. and Lo,
       Wan-Yen and Doll, Piotr and Girshick, Ross
     """
@@ -37,10 +37,11 @@ def run_ai_model_inferencing(json_data):
     print('Running Segment anything facebook model')
 
     # Extract image data and size information from JSON input
-    image_data, size_data, foreground_data = json_data.get("image"), json_data.get("tilesize"), json_data.get("nuclei_location")
+    image_data, size_data, foreground_data = json_data.get(
+        "image"), json_data.get("tilesize"), json_data.get("nuclei_location")
     gx, gy, _, _, x, y = size_data
 
-    #adding tile reference to the input cordinates
+    # adding tile reference to the input cordinates
     for element in foreground_data:
         element[0] = int(np.abs(element[0] - x))
         element[1] = int(np.abs(element[1] - y))
@@ -68,16 +69,17 @@ def run_ai_model_inferencing(json_data):
     input_label = np.array([1])
 
     masks, scores, logits = predictor.predict(
-    point_coords = np.array(foreground_data),
-    point_labels = input_label,
-    multimask_output = False)
+        point_coords=np.array(foreground_data),
+        point_labels=input_label,
+        multimask_output=False)
 
     # Analyze the segmentation results and create annotations for detected
     print(f"masks shape: {masks.shape}")
-    contours, _ = cv2.findContours(masks[0].astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    #select the largest contours
+    contours, _ = cv2.findContours(masks[0].astype(
+        'uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # select the largest contours
     output_list = [[[x[0][0] + gx, x[0][1] + gy, 0]
-                            for x in arr.tolist()] for arr in list(contours)]
+                    for x in arr.tolist()] for arr in list(contours)]
     nuclei_annot_list = []
     for record in output_list:
         cur_annot = {
@@ -96,7 +98,8 @@ def run_ai_model_inferencing(json_data):
 if __name__ == "__main__":
     # Example usage when run as a standalone script
     image_file = "/home/local/KHQ/s.erattakulangara/Documents/HistomicsTK_EKS/dsa-run-custom-ai-models/debug/workspace/test_12.png"
-    image = cv2.imread(image_file)[:500,:500,:]
-    payload = {"image": image, "tilesize":(0,0,0,0,0,0),"nuclei_location":[[288, 302]]}
+    image = cv2.imread(image_file)[:500, :500, :]
+    payload = {"image": image, "tilesize": (
+        0, 0, 0, 0, 0, 0), "nuclei_location": [[288, 302]]}
     output = run_ai_model_inferencing(payload)
     print(output)
