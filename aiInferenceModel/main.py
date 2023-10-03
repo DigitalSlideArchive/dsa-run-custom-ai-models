@@ -9,8 +9,11 @@ from utils import pre_load_ai_models
 
 app = FastAPI()
 
-#pre-load ai models for faster execution
+# Pre-load ai models for faster execution
 mobile_sam, nuclick_class, nuclick_seg = pre_load_ai_models()
+
+# Request count
+request_count = 0
 
 @app.get("/")
 def read_root():
@@ -19,6 +22,9 @@ def read_root():
 # Endpoint for Nuclick AI model classification
 @app.post("/nuclick_classification/")
 async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
     try:
         json_data = await request.json()
         network_output = nuclickClassification.run_ai_model_inferencing(
@@ -32,6 +38,9 @@ async def process_ima(request: Request):
 # Endpoint for Nuclick AI model segmentation
 @app.post("/nuclick_segmentation/")
 async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
     try:
         json_data = await request.json()
         network_output = nuclickSegmentation.run_ai_model_inferencing(
@@ -45,6 +54,9 @@ async def process_ima(request: Request):
 # Endpoint for Segment anything AI model segmentation
 @app.post("/segment_anything/")
 async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
     try:
         json_data = await request.json()
         network_output = samSegmentation.run_ai_model_inferencing(json_data)
@@ -57,6 +69,9 @@ async def process_ima(request: Request):
 # Endpoint for Segment anything AI model with user input
 @app.post("/segment_anything_onclick/")
 async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
     try:
         json_data = await request.json()
         network_output = samOnclick.run_ai_model_inferencing(json_data)
@@ -69,6 +84,9 @@ async def process_ima(request: Request):
 # Endpoint for Mobile segment anything model    
 @app.post("/segment_anything_mobile/")
 async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
     try:
         json_data = await request.json()
         network_output = samMobile.run_ai_model_inferencing(json_data, mobile_sam)
