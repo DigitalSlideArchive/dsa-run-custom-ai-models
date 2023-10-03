@@ -157,14 +157,12 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
 
 def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                             invert_image=False, is_wsi=False, src_mu_lab=None,
-                            src_sigma_lab=None, default_img_inversion=False):
-    # define the type of process
-    classification = False
+                            src_sigma_lab=None, default_img_inversion=False,
+                            nuclei_center_coordinates=False):
 
     # Selecting the ai model
     if args.prebuild_ai_models == "Nuclick Classification":
         network_location = 'http://172.18.0.1:8000/nuclick_classification/'
-        classification = True
     if args.prebuild_ai_models == "Nuclick Segmentation":
         network_location = 'http://172.18.0.1:8000/nuclick_segmentation/'
     if args.prebuild_ai_models == "Segment Anything":
@@ -202,7 +200,7 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
             'gwidth'], tile['x'], tile['y']
 
         # Prepare payload for HTTP request.
-        payload = {}
+        payload = {"model_type":args.type_ai_models}
 
         # Include nuclei center in payload if specified
         if args.nuclei_center:
@@ -252,7 +250,7 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_list = [
                 anot for anot_list in tile_nuclei_list for anot in anot_list]
 
-        if np.all(np.array(args.nuclei_center) == -1) and not classification:
+        if nuclei_center_coordinates and args.type_ai_models == "Segmentation":
             break
     return nuclei_list
 
@@ -263,13 +261,19 @@ def main(args):
     invert_image = False
     default_img_inversion = False
     process_whole_image = False
+    nuclei_center_coordinates = False
 
     validate_args(args)
 
+    # Check if the whole slide should be analyzed
     if np.all(np.array(args.analysis_roi) == -1):
         process_whole_image = True
-    else:
-        process_whole_image = False
+
+    # Check if the nuclei coordinates are present
+    if np.all(np.array(args.nuclei_center) == -1):
+        nuclei_center_coordinates = True
+
+    
 
     # Provide default value for tile_overlap
     tile_overlap = args.tile_overlap_value
@@ -310,8 +314,7 @@ def main(args):
     #
     # automatically deciding the tile size #TODO
     #
-    if process_whole_image and not np.all(np.array(args.nuclei_center) == -1):
-        print('it_kwargs being triggered', np.all(np.array(args.nuclei_center) == -1))
+    if process_whole_image and not nuclei_center_coordinates:
 
         for i in range(0,len(args.nuclei_center),2):
             x_array = []
@@ -375,7 +378,7 @@ def main(args):
                 args, invert_image=invert_image, default_img_inversion=default_img_inversion)
 
     #
-    # Detect nuclei in parallel using Dask
+    # Process nuclei using AI models
     #
     nuclei_list = detect_nuclei_with_ai(
         ts,
@@ -386,7 +389,8 @@ def main(args):
         is_wsi,
         src_mu_lab,
         src_sigma_lab,
-        default_img_inversion=default_img_inversion)
+        default_img_inversion=default_img_inversion,
+        nuclei_center_coordinates=nuclei_center_coordinates)
 
     #
     # Remove overlapping nuclei

@@ -31,6 +31,15 @@
       <longflag>ai_model</longflag>
       <default></default>
     </string>
+    <string-enumeration>
+      <name>type_ai_models</name>
+      <label>Select the type of AI model</label>
+      <description>Select if the model is "Segmentation" or "Classification"</description>
+      <longflag>type_ai_models</longflag>
+      <element>Segmentation</element>
+      <element>Classification</element>
+      <default>Segmentation</default>
+    </string-enumeration>
     <region shapes="point,multi,submitoff">
       <name>nuclei_center</name>
       <label>Nuclei Locations</label>
