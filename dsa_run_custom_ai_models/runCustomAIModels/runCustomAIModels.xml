@@ -21,6 +21,7 @@
       <element>Segment Anything</element>
       <element>Segment Anything onclick</element>
       <element>Mobile Segment Anything</element>
+      <element>Stardist H and E Segmentation</element>
       <default>Mobile Segment Anything</default>
     </string-enumeration>
     <string>
