@@ -163,6 +163,8 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         network_location = 'http://172.18.0.1:8000/segment_anything_onclick/'
     if args.prebuild_ai_models == "Mobile Segment Anything":
         network_location = 'http://172.18.0.1:8000/segment_anything_mobile/'
+    if args.prebuild_ai_models == "Stardist H and E Segmentation":
+        network_location = "http://172.18.0.1:8000/stardist_h_and_e/"
 
     tile_nuclei_list = []
 
