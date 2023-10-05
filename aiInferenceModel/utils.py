@@ -4,6 +4,7 @@ import urllib.request
 import torch
 from mobile_sam import sam_model_registry
 from monai.networks.nets import BasicUNet, DenseNet121
+from stardist.models import StarDist2D
 
 ai_model_dir = "./model_weights"
 
@@ -81,4 +82,8 @@ def pre_load_ai_models():
     model_state_dict = checkpoint.get("nuclickSegmentation", checkpoint)
     nuclick_seg.load_state_dict(model_state_dict, strict=True)
 
-    return mobile_sam, nuclick_class, nuclick_seg
+    #stardist ai model
+    StarDist2D.from_pretrained()
+    stardist_seg = StarDist2D.from_pretrained('2D_versatile_he')
+
+    return mobile_sam, nuclick_class, nuclick_seg, stardist_seg
