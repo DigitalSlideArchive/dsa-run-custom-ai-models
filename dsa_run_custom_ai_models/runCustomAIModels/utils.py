@@ -149,9 +149,8 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
 
 
 def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
-                          invert_image=False, is_wsi=False, src_mu_lab=None,
-                          src_sigma_lab=None, default_img_inversion=False,
-                          nuclei_center_coordinates=False):
+                          invert_image=False, is_wsi=False, default_img_inversion=False,
+                          nuclei_center_coordinates=False, process_whole_image=False):
 
     modelList = {
         'Nuclick Classification': 'nuclick_classification',
@@ -173,16 +172,40 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
 
         tile_position = tile['tile_position']['position']
 
+        # Sub process for mask and annotations
+        if args.send_mask_tiles or args.send_nuclei_annotations:
+            if is_wsi:
+                if process_whole_image:
+                    im_fgnd_mask_lres, fgnd_seg_scale = process_wsi_as_whole_image(
+                        ts, invert_image=invert_image, args=args,
+                        default_img_inversion=default_img_inversion)
+                    tile_fgnd_frac_list = process_wsi(ts,
+                                                            it_kwargs,
+                                                            args,
+                                                            im_fgnd_mask_lres,
+                                                            fgnd_seg_scale,
+                                                            process_whole_image)
+                else:
+                    tile_fgnd_frac_list = process_wsi(ts, it_kwargs, args)
+        # Compute reinhard stats for color normalization
+            src_mu_lab = None
+            src_sigma_lab = None
+
+            if is_wsi and process_whole_image:
+                # Get a tile
+                tile_info = ts.getSingleTile(
+                    format=large_image.tilesource.TILE_FORMAT_NUMPY,
+                    frame=args.frame)
+                # Get tile image & check number of channels
+                single_channel = len(
+                    tile_info['tile'].shape) <= 2 or tile_info['tile'].shape[2] == 1
+                if not single_channel:
+                    src_mu_lab, src_sigma_lab = compute_reinhard_norm(
+                        args, invert_image=invert_image, default_img_inversion=default_img_inversion)
+                    pass
+
         if is_wsi and tile_fgnd_frac_list[tile_position] <= args.min_fgnd_frac:
             continue
-
-        # detect nuclei
-        cur_nuclei_list = htk_nuclear.detect_tile_nuclei(
-            tile,
-            args,
-            src_mu_lab, src_sigma_lab, invert_image=invert_image,
-            default_img_inversion=default_img_inversion,
-        )
 
         # Extract tile information.
         gx, gy, gh, gw, x, y = tile['gx'], tile['gy'], tile['gheight'], tile[
@@ -211,6 +234,12 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
 
         # Include nuclei annotations in payload if specified.
         if args.send_nuclei_annotations:
+            cur_nuclei_list = htk_nuclear.detect_tile_nuclei(
+                tile,
+                args,
+                src_mu_lab, src_sigma_lab, invert_image=invert_image,
+                default_img_inversion=default_img_inversion,
+            )
             payload["nuclei"] = cur_nuclei_list
 
         # Include tile size information in payload.

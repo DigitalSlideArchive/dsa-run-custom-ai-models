@@ -4,7 +4,6 @@ from pathlib import Path
 
 import histomicstk
 import histomicstk.segmentation.label as htk_seg_label
-import large_image
 import numpy as np
 import utils
 from histomicstk.cli.utils import CLIArgumentParser
@@ -25,7 +24,7 @@ def main(args):
         process_whole_image = True
 
     # Check if the nuclei coordinates are present
-    if np.all(np.array(args.nuclei_center) == -1):
+    if np.all(np.array(args.nuclei_center) != -1):
         nuclei_center_coordinates = True
 
     # Provide default value for tile_overlap
@@ -68,7 +67,7 @@ def main(args):
     #
     # Automatically deciding the tile size
     #
-    if process_whole_image and not nuclei_center_coordinates:
+    if process_whole_image and nuclei_center_coordinates:
 
         for i in range(0, len(args.nuclei_center), 2):
             x_array = []
@@ -86,7 +85,6 @@ def main(args):
             'height': args.min_nucleus_area * 2,
             'units': 'base_pixels'
         }
-        ######################################################
 
     if not process_whole_image:
 
@@ -98,40 +96,6 @@ def main(args):
             'units': 'base_pixels'
         }
 
-    if is_wsi:
-
-        if process_whole_image:
-
-            im_fgnd_mask_lres, fgnd_seg_scale = utils.process_wsi_as_whole_image(
-                ts, invert_image=invert_image, args=args,
-                default_img_inversion=default_img_inversion)
-            tile_fgnd_frac_list = utils.process_wsi(ts,
-                                                    it_kwargs,
-                                                    args,
-                                                    im_fgnd_mask_lres,
-                                                    fgnd_seg_scale,
-                                                    process_whole_image)
-        else:
-            tile_fgnd_frac_list = utils.process_wsi(ts, it_kwargs, args)
-
-    #
-    # Compute reinhard stats for color normalization
-    #
-    src_mu_lab = None
-    src_sigma_lab = None
-
-    if is_wsi and process_whole_image:
-        # Get a tile
-        tile_info = ts.getSingleTile(
-            format=large_image.tilesource.TILE_FORMAT_NUMPY,
-            frame=args.frame)
-        # Get tile image & check number of channels
-        single_channel = len(
-            tile_info['tile'].shape) <= 2 or tile_info['tile'].shape[2] == 1
-        if not single_channel:
-            src_mu_lab, src_sigma_lab = utils.compute_reinhard_norm(
-                args, invert_image=invert_image, default_img_inversion=default_img_inversion)
-
     #
     # Process nuclei using AI models
     #
@@ -142,10 +106,9 @@ def main(args):
         args,
         invert_image,
         is_wsi,
-        src_mu_lab,
-        src_sigma_lab,
         default_img_inversion=default_img_inversion,
-        nuclei_center_coordinates=nuclei_center_coordinates)
+        nuclei_center_coordinates=nuclei_center_coordinates,
+        process_whole_image=process_whole_image)
 
     #
     # Remove overlapping nuclei
@@ -165,8 +128,6 @@ def main(args):
         'name': annot_fname + '-nuclei-' + args.nuclei_annotation_format,
         'elements': nuclei_list,
         'attributes': {
-            'src_mu_lab': None if src_mu_lab is None else src_mu_lab.tolist(),
-            'src_sigma_lab': None if src_sigma_lab is None else src_sigma_lab.tolist(),
             'params': vars(args),
             'cli': Path(__file__).stem,
             'version': histomicstk.__version__,
