@@ -66,14 +66,14 @@
       <label>Nuclei mask</label>
       <description></description>
       <longflag>send_mask_tiles</longflag>
-      <default>True</default>
+      <default>False</default>
     </boolean>
       <boolean>
       <name>send_nuclei_annotations</name>
       <label>Nuclei annotations</label>
       <description></description>
       <longflag>send_nuclei_annotations</longflag>
-      <default>True</default>
+      <default>False</default>
     </boolean>
   </parameters>
   <parameters>

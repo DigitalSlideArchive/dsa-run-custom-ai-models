@@ -183,8 +183,6 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
             src_mu_lab, src_sigma_lab, invert_image=invert_image,
             default_img_inversion=default_img_inversion,
         )
-        # Generate nuclei mask.
-        nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
 
         # Extract tile information.
         gx, gy, gh, gw, x, y = tile['gx'], tile['gy'], tile['gheight'], tile[
@@ -207,6 +205,8 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
 
         # Include mask data in payload if specified.
         if args.send_mask_tiles:
+            # Generate nuclei mask.
+            nuclei_mask = generate_mask(tile, args, src_mu_lab, src_sigma_lab)
             payload["mask"] = np.asarray(nuclei_mask).tolist()
 
         # Include nuclei annotations in payload if specified.
