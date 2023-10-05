@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib
 
 import histomicstk.preprocessing.color_deconvolution as htk_cdeconv
 import histomicstk.preprocessing.color_normalization as htk_cnorm
@@ -28,11 +29,11 @@ def read_input_image(args):
 def image_inversion_flag_setter(args=None):
     # Generates image inversion flags
     invert_image, default_img_inversion = False, False
-    if args.ImageInversionForm == "Yes":
+    if args.ImageInversionForm == 'Yes':
         invert_image = True
-    if args.ImageInversionForm == "No":
+    if args.ImageInversionForm == 'No':
         invert_image = False
-    if args.ImageInversionForm == "default":
+    if args.ImageInversionForm == 'default':
         default_img_inversion = True
     return invert_image, default_img_inversion
 
@@ -110,7 +111,7 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     if single_channel:
         im_tile = np.dstack(
             (im_tile['tile'], im_tile['tile'], im_tile['tile']))
-        if args.ImageInversionForm == "Yes":
+        if args.ImageInversionForm == 'Yes':
             invert_image = True
     else:
         im_tile = im_tile['tile'][:, :, :3]
@@ -152,17 +153,17 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                           src_sigma_lab=None, default_img_inversion=False,
                           nuclei_center_coordinates=False):
 
-    # Selecting the ai model
-    if args.prebuild_ai_models == "Nuclick Classification":
-        network_location = 'http://172.18.0.1:8000/nuclick_classification/'
-    if args.prebuild_ai_models == "Nuclick Segmentation":
-        network_location = 'http://172.18.0.1:8000/nuclick_segmentation/'
-    if args.prebuild_ai_models == "Segment Anything":
-        network_location = 'http://172.18.0.1:8000/segment_anything/'
-    if args.prebuild_ai_models == "Segment Anything onlick":
-        network_location = 'http://172.18.0.1:8000/segment_anything_onclick/'
-    if args.prebuild_ai_models == "Mobile Segment Anything":
-        network_location = 'http://172.18.0.1:8000/segment_anything_mobile/'
+    modelList = {
+        'Nuclick Classification': 'nuclick_classification',
+        'Nuclick Segmentation': 'nuclick_segmentation',
+        'Segment Anything': 'segment_anything',
+        'Segment Anything onclick': 'segment_anything_onclick',
+        'Mobile Segment Anything': 'segment_anything_mobile',
+    }
+    network_location = 'http://localhost:8000' if not args.ai_model else args.ai_model
+    if not urllib.parse.urlparse(network_location).path and args.prebuild_ai_models in modelList:
+        network_location = (network_location.rstrip('/') + '/' +
+                            modelList[args.prebuild_ai_models] + '/')
 
     tile_nuclei_list = []
 
