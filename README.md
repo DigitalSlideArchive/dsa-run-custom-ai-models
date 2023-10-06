@@ -131,3 +131,7 @@ Until today, we have successfully integrated three distinct AI models designed f
 **[Nuclick nuclei classification](./docs/tutorials/nuclickClassification.md)**
 
 **[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
+
+**[Mobile Segment anything](docs/tutorials/mobileSegmentAnything.md)**
+
+**[StarDist nuclei segmentation](docs/tutorials/stardistSegmentation.md)**
