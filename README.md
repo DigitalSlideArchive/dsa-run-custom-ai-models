@@ -13,6 +13,29 @@ The AI Adapter facilitates the connection of pre-built and custom AI models with
 
 *Created by [Subin Erattakulangara](www.subinek.com)*
 
+### Current methods for sharing AI models and their issues
+
+![classical ai models](./docs/media/classical-ai-methods.png)
+
+### Advantages of DSA AI adapter
+
+1. No need to build an extension
+
+2. Custom AI models can be connected to the AI adapter by deploying it using FastAPI
+
+3. AI Adapter Can output more information that just images.
+
+        -Image tiles (can add pre-processing by the HistomicsTK modules in the UI)
+        -Nuclei maps
+        -Segmentations
+
+4. Inbuild functionality to process single nuclei (onClick method), Region of interest and whole slide images.
+
+5. Output can be saved as annotations or CSV files
+
+### DSA Adapter in a nutshell
+![DSA adapter screen](./docs/media/dsa-ui.svg)
+
 ### Installation instructions
 
 #### Step 1 - Install DSA adapater for AI models
