@@ -37,9 +37,9 @@
       <label>Select the type of AI model</label>
       <description>Select if the model is "Segmentation" or "Classification"</description>
       <longflag>type_ai_models</longflag>
-      <element>Segmentation</element>
-      <element>Classification</element>
-      <default>Segmentation</default>
+      <element>Onclick</element>
+      <element>Whole slide</element>
+      <default>Onclick</default>
     </string-enumeration>
     <region shapes="point,multi,submitoff">
       <name>nuclei_center</name>

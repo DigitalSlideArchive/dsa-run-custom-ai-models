@@ -153,14 +153,20 @@ Alternatively, you can run the AI models without Docker by creating a Conda envi
 
 ## How to use pre-build AI models
 
-Until today, we have successfully integrated three distinct AI models designed for the comprehensive analysis of histopathology images, encompassing both segmentation and classification tasks. Below, you will find detailed tutorials for utilizing each of these individual models.
+Until today, we have successfully integrated five distinct AI models designed for the comprehensive analysis of histopathology images, encompassing both segmentation and classification tasks. Below, you will find detailed tutorials for utilizing each of these individual models.
 
-**[Nuclick nuclei segmentation](docs/tutorials/nuclickSegmentation.md)**
+##### OnClick Models
 
-**[Nuclick nuclei classification](./docs/tutorials/nuclickClassification.md)**
+- **[Nuclick nuclei segmentation](docs/tutorials/nuclickSegmentation.md)**
 
-**[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
+- **[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
 
-**[Mobile Segment anything](docs/tutorials/mobileSegmentAnything.md)**
+- **[Mobile Segment anything](docs/tutorials/mobileSegmentAnything.md)**
 
-**[StarDist nuclei segmentation](docs/tutorials/stardistSegmentation.md)**
+##### Whole slide models
+
+- **[Nuclick nuclei classification](./docs/tutorials/nuclickClassification.md)**
+
+- **[StarDist nuclei segmentation](docs/tutorials/stardistSegmentation.md)**
+
+- **[Segment anything (Facebook)](docs/tutorials/segmentAnythingSegmentation.md)**
