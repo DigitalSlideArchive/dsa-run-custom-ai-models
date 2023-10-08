@@ -25,4 +25,4 @@ Efficiently segment all entities within the provided image, including nuclei and
 #### Segment anything onclick with HistomicsTK
 In this particular section, the Segment Anything Model requires user input to initiate the segmentation process. This input serves as a guiding parameter for the segmentation, allowing the model to precisely delineate the specified object of interest within the input slide image. This functionality can be applied to segment various entities, such as nuclei or any enclosed objects, within the image.
 
-![Segment anything onclick]()
+![Segment anything onclick](../media/segment-anything-onclick.gif)

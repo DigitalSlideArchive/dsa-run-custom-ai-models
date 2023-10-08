@@ -19,6 +19,6 @@ In terms of inference speed, MobileSAM demonstrates remarkable efficiency. On a 
 2. Select **"Mobile Segment Anything"** from the dropdown menu for AI models.
 &nbsp;
 
-3. Determine the nuclei you wan't to select.
+3. Identify the nuclei you wish to select, and then simply click "Submit." Alternatively, you can continuously select nuclei by utilizing the dropdown menu, as demonstrated in the GIF below.
 
-![Select segment anything]()
+![Select segment anything](../media/mobile-segmenation.gif)

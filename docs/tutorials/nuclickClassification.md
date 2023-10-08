@@ -29,4 +29,4 @@ boxes are provided as the output for the users to recognize the type of nuclei p
 
 3. Determine the Region of Interest (ROI) and submit the request.
 
-![Select NuClick Classifier](../media/run-nuclick-segmentation.gif)
+![Select NuClick Classifier](../media/nuclick-classification.gif)

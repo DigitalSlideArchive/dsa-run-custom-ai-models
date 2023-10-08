@@ -17,5 +17,6 @@ Segments individual nuclei provided the user give input for the center of the nu
 2. Select **"Segment Anything"** from the dropdown menu for AI models.
 &nbsp;
 
-3. Determine the Region of Interest (ROI) and submit the request.
-   <!-- ![Select nuclick segmentation](../media/segment-anything.gif) -->
+3. Identify the nuclei you wish to select, and then simply click "Submit." Alternatively, you can continuously select nuclei by utilizing the dropdown menu, as demonstrated in the GIF below.
+
+![Select nuclick segmentation](../media/nuclick-segmentation.gif)
