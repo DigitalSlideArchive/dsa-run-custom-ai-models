@@ -1,6 +1,6 @@
 # Import AI model modules
 from ai_models import (nuclickClassification, nuclickSegmentation, samMobile,
-                       samOnclick, samSegmentation)
+                       samOnclick, samSegmentation, stardistSegmentation)
 from fastapi import FastAPI, HTTPException, Request
 from utils import pre_load_ai_models
 
@@ -11,7 +11,7 @@ from utils import pre_load_ai_models
 app = FastAPI()
 
 # Pre-load ai models for faster execution
-mobile_sam, nuclick_class, nuclick_seg = pre_load_ai_models()
+mobile_sam, nuclick_class, nuclick_seg, stardist_seg = pre_load_ai_models()
 
 # Request count
 request_count = 0
@@ -110,6 +110,21 @@ async def process_ima(request: Request):
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
 
+@app.post("/stardist_h_and_e/")
+async def process_ima(request: Request):
+    global request_count
+    print(f"Request number : {request_count}")
+    request_count += 1
+    try:
+        json_data = await request.json()
+        network_output = stardistSegmentation.run_ai_model_inferencing(
+            json_data, stardist_seg)
+
+        return {"network_output": network_output}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
 
 # Endpoint for custom AI model
 """""
