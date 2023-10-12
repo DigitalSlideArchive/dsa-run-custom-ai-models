@@ -271,6 +271,6 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         nuclei_list = [
             anot for anot_list in tile_nuclei_list for anot in anot_list]
 
-        if nuclei_center_coordinates and args.type_ai_models == "Segmentation":
+        if nuclei_center_coordinates and args.type_ai_models == "Whole slide":
             break
     return nuclei_list
