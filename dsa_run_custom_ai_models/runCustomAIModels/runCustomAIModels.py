@@ -8,6 +8,8 @@ import numpy as np
 import utils
 from histomicstk.cli.utils import CLIArgumentParser
 
+import time
+
 
 def main(args):
 
@@ -99,6 +101,7 @@ def main(args):
     #
     # Process nuclei using AI models
     #
+    web_call_time = time.time()
     nuclei_list = utils.detect_nuclei_with_ai(
         ts,
         tile_fgnd_frac_list,
@@ -109,6 +112,7 @@ def main(args):
         default_img_inversion=default_img_inversion,
         nuclei_center_coordinates=nuclei_center_coordinates,
         process_whole_image=process_whole_image)
+    print(f"Send and receive time {time.time()-web_call_time}")
 
     #
     # Remove overlapping nuclei
@@ -121,6 +125,7 @@ def main(args):
     #
     # Write annotation file
     #
+    annotation_time = time.time()
     annot_fname = os.path.splitext(
         os.path.basename(args.outputNucleiAnnotationFile))[0]
 
@@ -143,7 +148,7 @@ def main(args):
                 ':'),
             sort_keys=False)
 
-
+    print(f"Annotation time {time.time() - annotation_time}")
 if __name__ == '__main__':
 
     main(CLIArgumentParser().parse_args())
