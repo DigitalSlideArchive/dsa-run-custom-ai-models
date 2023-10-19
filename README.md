@@ -111,8 +111,6 @@ To run the AI model using Docker, follow these steps:
     ```
 
     If you can see the API documentation, it means the AI models are successfully running in your environment.
-
-![Fast-API](./docs/media/fast-api.png)
 &nbsp;
 
 ##### Method 2 - Using Conda

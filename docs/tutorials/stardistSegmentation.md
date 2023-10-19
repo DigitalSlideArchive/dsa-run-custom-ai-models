@@ -22,6 +22,15 @@ The following figure illustrates the general approach for 2D images. The trainin
 2. Select **"Stardist H and E Segmentation"** from the dropdown menu for AI models.
 &nbsp;
 
-3. Determine the nuclei you wan't to select.
+3. Determine the location to segment nuclei by using the ROI tool.
+&nbsp;
 
-![Select segment anything]()
+4. Select *Whole Slide* method from the drop down menu
+&nbsp;
+
+5. Provide tick mark to both *Image tiles* and *Nuclei mask* since that information is required by the AI model
+&nbsp;
+
+6. Submit to generate the result.
+
+![Select segment anything](../media/stardist-h-and-e.gif)
