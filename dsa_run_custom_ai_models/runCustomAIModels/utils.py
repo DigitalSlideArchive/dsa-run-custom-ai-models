@@ -158,6 +158,7 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         'Segment Anything': 'segment_anything',
         'Segment Anything onclick': 'segment_anything_onclick',
         'Mobile Segment Anything': 'segment_anything_mobile',
+        'Stardist H and E Segmentation': 'stardist_h_and_e' 
     }
     network_location = 'http://localhost:8000' if not args.ai_model else args.ai_model
     if not urllib.parse.urlparse(network_location).path and args.prebuild_ai_models in modelList:
