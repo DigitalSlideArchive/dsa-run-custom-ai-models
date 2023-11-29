@@ -77,7 +77,7 @@ def run_ai_model_inferencing(json_data, network):
     }
     patch_size = 64
     curated_annotation_data = []
-    for element in annot_data[0]:
+    for element in annot_data:
         xr, yr, xw, yh = element['center'][0], element['center'][1], element['width'], element['height']
         x = xr - xc
         y = yr - yc
