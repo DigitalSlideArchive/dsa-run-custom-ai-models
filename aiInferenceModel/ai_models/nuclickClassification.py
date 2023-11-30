@@ -8,7 +8,6 @@ import torch
 import torch.nn.functional as F
 from monai.apps.nuclick.transforms import AddLabelAsGuidanced
 from monai.data import PILReader
-from monai.networks.nets import DenseNet121
 from monai.transforms import (Compose, EnsureChannelFirstd, LoadImaged,
                               ScaleIntensityRangeD, Transform)
 

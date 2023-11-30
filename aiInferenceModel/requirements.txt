@@ -11,6 +11,9 @@ temp
 opencv-python-headless
 matplotlib
 scikit-image
+tensorflow
+csbdeep
+stardist
 
 #segment anything
 git+https://github.com/facebookresearch/segment-anything.git
