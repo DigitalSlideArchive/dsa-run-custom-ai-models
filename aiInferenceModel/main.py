@@ -1,12 +1,12 @@
 # Import AI model modules
 from ai_models import (nuclickClassification, nuclickSegmentation, samMobile,
-                       samOnclick, samSegmentation, stardistSegmentation)
+                       samOnclick, samSegmentation, stardistSegmentation, CustomAIModel)
 from fastapi import FastAPI, HTTPException, Request
 from utils import pre_load_ai_models
 
 # You can import your custom AI models into this code
 # Example: import customSegmentationModel
-# Then uncomment the Endpoint for custom AI models
+# Use the Endpoint for custom AI models
 
 app = FastAPI()
 
@@ -110,6 +110,9 @@ async def process_ima(request: Request):
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
 
+# Endpoint for Stardist segmentation
+
+
 @app.post("/stardist_h_and_e/")
 async def process_ima(request: Request):
     global request_count
@@ -127,7 +130,8 @@ async def process_ima(request: Request):
         raise HTTPException(status_code=400, detail="Invalid data")
 
 # Endpoint for custom AI model
-"""""
+
+
 @app.post("/custom_ai_model/")
 async def process_ima(request: Request):
     try:
@@ -135,7 +139,7 @@ async def process_ima(request: Request):
         json_data = await request.json()
 
         # Run segmentation model inference
-        network_output = customSegmentationModel.run_ai_model_inferencing(json_data)
+        network_output = CustomAIModel.run_ai_model_inferencing(json_data)
 
         # Return the model's output
         return {"network_output": network_output}
@@ -143,7 +147,6 @@ async def process_ima(request: Request):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
-"""""
 
 # Run the FastAPI application using Uvicorn
 if __name__ == "__main__":
