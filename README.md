@@ -47,13 +47,17 @@ The AI Adapter facilitates the connection of pre-built and custom AI models with
 #### Step 1 - Install DSA adapater for AI models
 Help users to deploy and run the AI applications with Digital slide archive
 
-Following are the steps needed to download and deploy the AI adapter
+Here are the cleaned-up instructions for downloading and deploying the AI adapter:
+
+1. Choose a folder of your preference.
+2. Open a terminal within the selected folder.
+3. Execute the following steps in the terminal at the root:
 
 ```shell
-git pull https://github.com/DigitalSlideArchive/dsa-run-custom-ai-models.git
+git init
 ```
 ```shell
-cd dsa-run-custom-ai-models
+git pull https://github.com/DigitalSlideArchive/dsa-run-custom-ai-models.git
 ```
 ```shell
 docker build --force-rm -t dsarchive/runcustomaimodels .
@@ -85,17 +89,16 @@ To run the AI model using Docker, follow these steps:
     ```shell
     cd aiInferenceModel
     ```
-
 2. Build the Docker image:
 
     ```shell
     docker build -t dsarchive/aimodels .
     ```
-
+###### *Note This stage may take longer to run
 3. Run the Docker container:
 
     ```shell
-    docker run -t -d -p 8017:80 --name aimodels dsarchive/aimodels
+    docker run -t -d -p 8000:80 --name aimodels dsarchive/aimodels
     ```
 
 4. Verify the status of the Docker image:
