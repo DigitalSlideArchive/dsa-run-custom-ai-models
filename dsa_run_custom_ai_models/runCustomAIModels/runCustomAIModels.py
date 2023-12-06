@@ -19,7 +19,11 @@ def main(args):
     process_whole_image = False
     nuclei_center_coordinates = False
 
+    # validate input arguments
     utils.validate_args(args)
+
+    # Load default options for AI model zoo
+    args = utils.default_options_for_ai_zoo(args)
 
     # Check if the whole slide should be analyzed
     if np.all(np.array(args.analysis_roi) == -1):
@@ -149,6 +153,8 @@ def main(args):
             sort_keys=False)
 
     print(f"Annotation time {time.time() - annotation_time}")
+
+
 if __name__ == '__main__':
 
     main(CLIArgumentParser().parse_args())

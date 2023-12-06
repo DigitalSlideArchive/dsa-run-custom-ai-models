@@ -148,6 +148,36 @@ def generate_mask(im_tile, args, src_mu_lab, src_sigma_lab):
     return im_nuclei_seg_mask
 
 
+def default_options_for_ai_zoo(args):
+    """
+    Set default options for the AI Zoo based on the specified prebuilt AI models.
+
+    Args:
+        args (Namespace): The namespace containing the arguments.
+
+    Returns:
+        Namespace: The modified namespace with default options set.
+    """
+    if args.ai_model in ["http://127.0.0.1:8000", '']:
+        if args.prebuild_ai_models in ["Nuclick Classification",
+                                       "Stardist H and E Segmentation"]:
+            args.type_ai_models = "Whole slide"
+            args.nuclei_center = None
+            args.send_image_tiles = True
+            args.send_mask_tiles = True
+            args.send_nuclei_annotations = True
+        elif args.prebuild_ai_models in ["Nuclick Segmentation", "Segment Anything onclick",
+                                         "Segment Anything", "Mobile Segment Anything"]:
+            print('anaysis roi before ', args.analysis_roi)
+            args.type_ai_models = "Onclick"
+            args.analysis_roi = [-1.0, -1.0, -1.0, -1.0]
+            args.send_image_tiles = True
+            args.send_mask_tiles = False
+            args.send_nuclei_annotations = False
+            print('anaysis roi after ', args.analysis_roi)
+    return args
+
+
 def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                           invert_image=False, is_wsi=False, default_img_inversion=False,
                           nuclei_center_coordinates=False, process_whole_image=False):
@@ -158,7 +188,7 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
         'Segment Anything': 'segment_anything',
         'Segment Anything onclick': 'segment_anything_onclick',
         'Mobile Segment Anything': 'segment_anything_mobile',
-        'Stardist H and E Segmentation': 'stardist_h_and_e' 
+        'Stardist H and E Segmentation': 'stardist_h_and_e'
     }
     network_location = 'http://localhost:8000' if not args.ai_model else args.ai_model
     if not urllib.parse.urlparse(network_location).path and args.prebuild_ai_models in modelList:
@@ -181,11 +211,11 @@ def detect_nuclei_with_ai(ts, tile_fgnd_frac_list, it_kwargs, args,
                         ts, invert_image=invert_image, args=args,
                         default_img_inversion=default_img_inversion)
                     tile_fgnd_frac_list = process_wsi(ts,
-                                                            it_kwargs,
-                                                            args,
-                                                            im_fgnd_mask_lres,
-                                                            fgnd_seg_scale,
-                                                            process_whole_image)
+                                                      it_kwargs,
+                                                      args,
+                                                      im_fgnd_mask_lres,
+                                                      fgnd_seg_scale,
+                                                      process_whole_image)
                 else:
                     tile_fgnd_frac_list = process_wsi(ts, it_kwargs, args)
         # Compute reinhard stats for color normalization
