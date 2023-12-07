@@ -162,7 +162,7 @@ def default_options_for_ai_zoo(args):
         if args.prebuild_ai_models in ["Nuclick Classification",
                                        "Stardist H and E Segmentation"]:
             args.type_ai_models = "Whole slide"
-            args.nuclei_center = None
+            args.nuclei_center = [-1.0, -1.0, -1.0, -1.0]
             args.send_image_tiles = True
             args.send_mask_tiles = True
             args.send_nuclei_annotations = True
