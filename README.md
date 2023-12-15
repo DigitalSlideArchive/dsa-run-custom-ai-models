@@ -112,7 +112,7 @@ To run the AI model using Docker, follow these steps:
 5. To ensure that the API is running, open the following URL in your web browser:
 
     ```shell
-    http://localhost:8017/docs
+    http://localhost:8000/docs
     ```
 
     If you can see the API documentation, it means the AI models are successfully running in your environment.
