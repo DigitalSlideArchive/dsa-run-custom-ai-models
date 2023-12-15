@@ -42,7 +42,7 @@ The AI Adapter facilitates the connection of pre-built and custom AI models with
 ### DSA Adapter in a nutshell
 ![DSA adapter screen](./docs/media/dsa-ui.svg)
 
-####[Click here for Developer Documentation](./docs/tutorials/developerDocs.md)
+#### [Click here for Developer Documentation](./docs/tutorials/developerDocs.md)
 
 ### Installation instructions
 
